@@ -7,7 +7,7 @@ use Exception;
 
 /**
  * 通联支付类
- * 
+ *
  * Class UnionPay
  * @package Sxqibo\FastPayment
  */
@@ -16,29 +16,44 @@ class UnionPay
     private $serviceEndPoint = 'https://vsp.allinpay.com/apiweb/unitorder'; // 生产环境
     private $testServiceEndPoint = 'https://test.allinpaygd.com/apiweb/unitorder'; // 测试环境
 
-    private $appId;
-    private $curId;
+    private $orgId; // 机构号
+    private $appId; // 应用ID
+    private $cusId; // 商户号
     private $privateKey;
     private $publicKey;
-    private $apiVersion = '11';
+    private $apiVersion = '11'; // 版本号，默认11
 
     private $headers;
     private $client;
 
-    public function __construct($appId, $curId, $privateKey, $publicKey)
+    public function __construct($params = [])
     {
-        $this->appId      = $appId;
-        $this->curId      = $curId;
-        $this->publicKey  = $privateKey;
-        $this->privateKey = $publicKey;
-        $this->headers    = [
-            'Content-Type' => ' application/x-www-form-urlencoded;charset=UTF-8'
-        ];
+        try {
+            $this->appId      = $params['app_id'];
+            $this->cusId      = $params['cus_id'];
+            $this->orgId      = $params['org_id'];
+            $this->publicKey  = $params['public_key'];
+            $this->privateKey = $params['private_key'];
 
-        $this->client = new Client();
+            $this->headers = [
+                'Content-Type' => ' application/x-www-form-urlencoded;charset=UTF-8'
+            ];
+
+            $this->client = new Client();
+        } catch (\Exception $e) {
+            throw new Exception('初始化实例异常');
+        }
+
     }
 
-
+    /**
+     * 获取请求节点信息
+     *
+     * @param $key
+     * @param false $isDebug
+     * @throws Exception
+     * @return mixed|string[]
+     */
     public function getEndPoint($key, $isDebug = false)
     {
         $endpoints = [
@@ -112,10 +127,6 @@ class UnionPay
     {
         // 注释格式：参数-参数名称-取值-可空-最大长度-备注
         $data = [
-            'orgid'     => $params['org_id'], // 机构号-代为发起交易的机构商户号-否-15
-            'cusid'     => $params['cus_id'], // 商户号-实际交易的商户号-否-15
-            'appid'     => $params['app_id'], // 应用ID-平台分配的APPID-否-8
-            'version'   => $params['version'] ?? $this->apiVersion, // 版本号-接口版本号-否-2
             'trxamt'    => $params['amount'], // 交易金额-单位为分-否-15
             'reqsn'     => $params['order_no'], // 商户交易单号-商户的交易订单号-否-32
             'paytype'   => $params['pay_type'], // 交易方式-详见附录3.3 交易方式-否-3
@@ -150,14 +161,11 @@ class UnionPay
              */
             'asinfo'        => $params['as_info'] ?? '',
 
-            'fqnum'    => $params['fq_num'] ?? '', // 花呗分期- 6 花呗分期6期/12 花呗分期12期 - 是-4 - 暂只支持支付宝花呗分期仅支持A01/A02
-            'signtype' => $params['sign_type'] ?? 'RSA', // 签名方式 RSA、SM2
+            'fqnum' => $params['fq_num'] ?? '', // 花呗分期- 6 花呗分期6期/12 花呗分期12期 - 是-4 - 暂只支持支付宝花呗分期仅支持A01/A02
         ];
 
-        $data['sign'] = $this->getSign($params);
-        $paramsStr    = AppUtil::ToUrlParams($params);
-
-        $endPoint = $this->getEndPoint('pay', $isDebug);
+        $paramsStr = $this->getParamsStr($params);
+        $endPoint  = $this->getEndPoint('pay', $isDebug);
 
         $result = $this->client->requestApi($endPoint, [], $paramsStr, $this->headers, true);
 
@@ -173,11 +181,6 @@ class UnionPay
     public function scanqrpay($params, $isDebug = false)
     {
         $data = [
-            'orgid'     => $params['org_id'], // 机构号-代为发起交易的机构商户号-否-15
-            'cusid'     => $params['cus_id'], // 商户号-实际交易的商户号-否-15
-            'appid'     => $params['app_id'], // 应用ID-平台分配的APPID-否-8
-            'version'   => $params['version'] ?? $this->apiVersion, // 版本号-接口版本号-否-2
-            'randomstr' => $params['random_str'], // 随机字符串-商户自行生成的随机字符串-否-32
             'trxamt'    => $params['amount'], // 交易金额-单位为分-否-15
             'reqsn'     => $params['order_no'], // 商户交易单号-商户的交易订单号-否-32
             'authcode'  => $params['auth_code'] ?? '', // 支付授权码-如微信,支付宝,银联的付款二维码 - 否-32
@@ -205,12 +208,9 @@ class UnionPay
             'asinfo'        => $params['as_info'] ?? '',
 
             'fqnum'    => $params['fq_num'] ?? '', // 花呗分期- 6 花呗分期6期/12 花呗分期12期 - 是-4 - 暂只支持支付宝花呗分期仅支持A01/A02
-            'signtype' => $params['sign_type'] ?? 'RSA', // 签名方式 RSA、SM2
         ];
 
-        $data['sign'] = $this->getSign($params);
-        $paramsStr    = AppUtil::ToUrlParams($params);
-
+        $paramsStr    = $this->getParamsStr($params);
         $endPoint = $this->getEndPoint('scanqrpay', $isDebug);
 
         $result = $this->client->requestApi($endPoint, [], $paramsStr, $this->headers, true);
@@ -218,12 +218,183 @@ class UnionPay
         return $this->handleResult($result);
     }
 
-
-    // 关闭订单
-    private function close($params, $isDebug)
+    /**
+     * 交易撤销 - 当天交易用撤销
+     * @param $refundNo
+     * @param $refundAmount
+     * @param array $extraParams
+     * @param false $isDebug
+     * @throws Exception
+     */
+    public function cancel($refundNo, $refundAmount, $extraParams = [], $isDebug = false)
     {
+        $params = [
+            'reqsn'    => $refundNo, // 商户的退款交易订单号
+            'trxamt'   => $refundAmount, // 退款金额 单位为分
+            'oldreqsn' => $extraParams['old_order_no'] ?? '', // 原交易的商户订单号
+            'oldtrxid' => $extraParams['old_trx_id'] ?? '', // 原交易的收银宝平台流水
+        ];
 
+        $endPoint  = $this->getEndPoint('cancel', $isDebug);
+        $paramsStr = $this->getParamsStr($params);
+        $result    = $this->client->requestApi($endPoint, [], $paramsStr, $this->headers, true);
+
+        return $this->handleResult($result);
     }
+
+    /**
+     * 交易退款 - 当天交易请用撤销,非当天交易才用此退货接口
+     * @param $refundNo
+     * @param $refundAmount
+     * @param array $extraParams
+     * @param false $isDebug
+     * @throws Exception
+     */
+    public function refund($refundNo, $refundAmount, $extraParams = [], $isDebug = false)
+    {
+        $params = [
+            'reqsn'         => $refundNo, // 商户的退款交易订单号
+            'trxamt'        => $refundAmount, // 退款金额 单位为分
+            'oldreqsn'      => $extraParams['old_order_no'] ?? '', // 原交易的商户订单号
+            'oldtrxid'      => $extraParams['old_trx_id'] ?? '', // 原交易的收银宝平台流水
+            'remark'        => $extraParams['remark'] ?? '', // 备注
+            'benefitdetail' => $extraParams['benefit_detail'] ?? '', // 优惠信息：只适用于银联单品优惠交易的退货
+        ];
+
+        $endPoint  = $this->getEndPoint('refund', $isDebug);
+        $paramsStr = $this->getParamsStr($params);
+        $result    = $this->client->requestApi($endPoint, [], $paramsStr, $this->headers, true);
+
+        return $this->handleResult($result);
+    }
+
+    /**
+     * 交易查询
+     *
+     * @param $orderNo
+     * @param string $trxId
+     * @param false $isDebug
+     * @throws Exception
+     */
+    public function query($orderNo, $trxId = '', $isDebug = false)
+    {
+        $params = [
+            'reqsn' => $orderNo, // 商户的交易订单号
+            'trxid' => $trxId, // 平台交易流水
+        ];
+
+        $endPoint  = $this->getEndPoint('query', $isDebug);
+        $paramsStr = $this->getParamsStr($params);
+        $result    = $this->client->requestApi($endPoint, [], $paramsStr, $this->headers, true);
+
+        return $this->handleResult($result);
+    }
+
+    /**
+     * 根据授权码(付款码)获取用户ID
+     *
+     * @param $authCode
+     * @param $authType
+     * @param array $extraParams
+     * @param false $isDebug
+     * @throws Exception
+     */
+    public function getAuthCodeToUserId($authCode, $authType, $extraParams = [], $isDebug = false)
+    {
+        $params = [
+            'auth_code' => $authCode, // 授权码（付款码）
+            'auth_type' => $authType, // 授权码类型 01-微信付款码 02-银联userAuth
+            'sub_appid' => $extraParams['sub_appid'] ?? '' // 微信支付appid - 针对01有效
+        ];
+
+        $endPoint  = $this->getEndPoint('getAuthCodeToUserId', $isDebug);
+        $paramsStr = $this->getParamsStr($params);
+        $result    = $this->client->requestApi($endPoint, [], $paramsStr, $this->headers, true);
+
+        return $this->handleResult($result);
+    }
+
+    /**
+     * 微信人脸授权码获取
+     *
+     * @param $storeId
+     * @param $storeName
+     * @param $rawData
+     * @param array $extraParams
+     * @param false $isDebug
+     * @throws Exception
+     */
+    public function getWxFacePayInfo($storeId, $storeName, $rawData, $extraParams = [], $isDebug = false)
+    {
+        $params = [
+            'storeid'   => $storeId, // 门店编号-由商户定义， 各门店唯一 - 否-32
+            'storename' => $storeName, // 门店名称 - 有商户定义-否-128
+            'deviceid'  => $extraParams['device_id'] ?? '', // 终端设备编号- 终端设备编号，由商户定义。-是-32
+            'attach'    => $extraParams['attach'] ?? '', // 附加字段。字段格式使用Json
+
+            //  初始化数据。由微信人脸SDK的接口返回。
+            //获取方式参见微信官方刷脸支付接口：
+            //[获取数据 getWxpayfaceRawdata](#获取数据 getWxpayfaceRawdata)
+            'rawdata'   => $rawData,
+            'subappid'  => $extraParams['sub_appid'] ?? '', // 微信支付appid
+        ];
+
+        $paramsStr = $this->getParamsStr($params);
+
+        $endPoint = $this->getEndPoint('getWxFacePayInfo', $isDebug);
+
+        $result = $this->client->requestApi($endPoint, [], $paramsStr, $this->headers, true);
+
+        return $this->handleResult($result);
+    }
+
+    /**
+     * 关闭订单
+     *
+     * @param $params
+     * @param $isDebug
+     * @throws Exception
+     */
+    private function close($orderNo, $oldTrxId = '', $isDebug = false)
+    {
+        $params = [
+            // oldreqsn和oldtrxid必填其一 //建议:商户如果同时拥有oldtrxid和oldreqsn,优先使用oldtrxid
+            'oldreqsn' => $orderNo, // 原商户的下单的交易订单号
+            'oldtrxid' => $oldTrxId, // 原通联平台交易流水
+        ];
+
+        $paramsStr = $this->getParamsStr($params);
+        $endPoint  = $this->getEndPoint('close', $isDebug);
+        $result    = $this->client->requestApi($endPoint, [], $paramsStr, $this->headers, true);
+
+        return $this->handleResult($result);
+    }
+
+    /**
+     * 整合提交的参数
+     *
+     * @param $data
+     * @throws Exception
+     * @return mixed
+     */
+    private function getParamsStr($params)
+    {
+        $publicParams = [
+            'orgid'     => $this->orgid, // 机构号-代为发起交易的机构商户号-否-15
+            'cusid'     => $this->cusId, // 商户号-实际交易的商户号-否-15
+            'appid'     => $this->appId, // 应用ID-平台分配的APPID-否-8
+            'version'   => $this->apiVersion, // 版本号-接口版本号-否-2
+            'randomstr' => $params['random_str'] ?? uniqid('', true),
+            'signtype'  => $params['sign_type'] ?? 'RSA',
+        ];
+
+        $params         = array_merge($publicParams, $params);
+        $params['sign'] = $this->getSign($params);
+        $paramsStr      = $this->ToUrlParams($params);
+
+        return $paramsStr;
+    }
+
 
     /**
      * 处理返回结果
