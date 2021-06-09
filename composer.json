@@ -1,0 +1,26 @@
+{
+  "name": "sxqibo/fast-payment",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Sxqibo\\FastPayment\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Sxqibo\\FastPayment\\Tests\\": "tests/"
+    }
+  },
+  "authors": [
+    {
+      "name": "weifeng",
+      "email": "50098161@qq.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.0",
+    "guzzlehttp/guzzle": "~6.0"
+  },
+  "minimum-stability": "dev"
+}
