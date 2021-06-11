@@ -3,7 +3,9 @@
 
 namespace Sxqibo\FastPayment;
 
+use Sxqibo\FastPayment\common\Client;
 use Exception;
+use Sxqibo\FastPayment\common\Utility;
 
 /**
  * 通联支付类
@@ -13,12 +15,12 @@ use Exception;
  */
 class UnionPay
 {
-    private $serviceEndPoint = 'https://vsp.allinpay.com/apiweb/unitorder'; // 生产环境
+    private $serviceEndPoint     = 'https://vsp.allinpay.com/apiweb/unitorder'; // 生产环境
     private $testServiceEndPoint = 'https://test.allinpaygd.com/apiweb/unitorder'; // 测试环境
 
-    private $orgId; // 机构号
     private $appId; // 应用ID
     private $cusId; // 商户号
+    // private $orgId; // 机构号
     private $privateKey;
     private $publicKey;
     private $apiVersion = '11'; // 版本号，默认11
@@ -29,9 +31,9 @@ class UnionPay
     public function __construct($params = [])
     {
         try {
-            $this->appId      = $params['app_id'];
-            $this->cusId      = $params['cus_id'];
-            $this->orgId      = $params['org_id'];
+            $this->appId = $params['app_id'];
+            $this->cusId = $params['cus_id'];
+            // $this->orgId      = $params['org_id'];
             $this->publicKey  = $params['public_key'];
             $this->privateKey = $params['private_key'];
 
@@ -51,8 +53,8 @@ class UnionPay
      *
      * @param $key
      * @param false $isDebug
-     * @throws Exception
      * @return mixed|string[]
+     * @throws Exception
      */
     public function getEndPoint($key, $isDebug = false)
     {
@@ -100,7 +102,6 @@ class UnionPay
         ];
 
         if (isset($endpoints[$key])) {
-
             if ($isDebug) {
                 $path = $this->testServiceEndPoint;
             } else {
@@ -127,10 +128,9 @@ class UnionPay
     {
         // 注释格式：参数-参数名称-取值-可空-最大长度-备注
         $data = [
-            'trxamt'    => $params['amount'], // 交易金额-单位为分-否-15
-            'reqsn'     => $params['order_no'], // 商户交易单号-商户的交易订单号-否-32
-            'paytype'   => $params['pay_type'], // 交易方式-详见附录3.3 交易方式-否-3
-            'randomstr' => $params['random_str'], // 随机字符串-商户自行生成的随机字符串-否-32
+            'trxamt'  => $params['amount'], // 交易金额-单位为分-否-15
+            'reqsn'   => $params['order_no'], // 商户交易单号-商户的交易订单号-否-32
+            'paytype' => $params['pay_type'], // 交易方式-详见附录3.3 交易方式-否-3
 
             'body'          => $params['title'] ?? '', // 订单标题-订单商品名称，为空则以商户名作为商品名称-是-100-最大100个字节(50个中文字符)-
             'remark'        => $params['remark'] ?? '', // 备注-备注信息-是-160-最大160个字节(80个中文字符)禁止出现+，空格，/，?，%，#，&，=这几类特殊符号
@@ -140,7 +140,7 @@ class UnionPay
             'limit_pay'     => $params['limit_pay'] ?? '', // 支付限制-no_credit--指定不能使用信用卡支付-是-32-暂时只对微信支付和支付宝有效,仅支持no_credit
             'sub_appid'     => $params['sub_appid'] ?? '', // 微信子appid-商户微信号-是-32-只对微信支付有效
             'goods_tag'     => $params['goods_tag'] ?? '', // 订单支付标识-订单优惠标记，用于区分订单是否可以享受优惠，字段内容在微信后台配置券时进行设置，说明详见代金券或立减优惠-是-32-只对微信支付有效W01交易方式不支持
-            'benefitdetail' => $params['benefit_detail'], // 优惠信息-Benefitdetail的json字符串,注意是String-是-不限制-仅支持微信单品优惠、W01交易方式不支持、支付宝智慧门店/支付宝单品优惠
+            'benefitdetail' => $params['benefit_detail'] ?? '', // 优惠信息-Benefitdetail的json字符串,注意是String-是-不限制-仅支持微信单品优惠、W01交易方式不支持、支付宝智慧门店/支付宝单品优惠
             'chnlstoreid'   => $params['channel_store_id'] ?? '', // 渠道门店编号-商户在支付渠道端的门店编号-是-不限制:例如对于支付宝支付，支付宝门店编号、对于微信支付，微信门店编号、W01交易方式不支持
             'extendparams'  => $params['extend_params'] ?? '', // 拓展参数-son字符串，注意是String、一般用于渠道的活动参数填写-是
             'cusip'         => $params['cus_ip'] ?? '', // 终端ip-用户下单和调起支付的终端ip地址-是-16-payType=U02云闪付JS支付不为空
@@ -164,28 +164,27 @@ class UnionPay
             'fqnum' => $params['fq_num'] ?? '', // 花呗分期- 6 花呗分期6期/12 花呗分期12期 - 是-4 - 暂只支持支付宝花呗分期仅支持A01/A02
         ];
 
-        $paramsStr = $this->getParamsStr($params);
+        $paramsStr = $this->getParamsStr($data);
         $endPoint  = $this->getEndPoint('pay', $isDebug);
-
-        $result = $this->client->requestApi($endPoint, [], $paramsStr, $this->headers, true);
+        $result    = $this->client->requestApi($endPoint, [], $paramsStr, $this->headers, true);
 
         return $this->handleResult($result);
     }
 
     /**
      * 统一扫码接口
-     * @param $params 参数
+     * @param $params array 参数
      * @param false $isDebug 是否调试模式
      * @throws Exception
      */
     public function scanqrpay($params, $isDebug = false)
     {
         $data = [
-            'trxamt'    => $params['amount'], // 交易金额-单位为分-否-15
-            'reqsn'     => $params['order_no'], // 商户交易单号-商户的交易订单号-否-32
-            'authcode'  => $params['auth_code'] ?? '', // 支付授权码-如微信,支付宝,银联的付款二维码 - 否-32
-            'body'      => $params['title'] ?? '', // 订单标题-订单商品名称，为空则以商户名作为商品名称-是-100-最大100个字节(50个中文字符)-
-            'remark'    => $params['remark'] ?? '', // 备注-备注信息-是-160-最大160个字节(80个中文字符)禁止出现+，空格，/，?，%，#，&，=这几类特殊符号
+            'trxamt'   => $params['amount'], // 交易金额-单位为分-否-15
+            'reqsn'    => $params['order_no'], // 商户交易单号-商户的交易订单号-否-32
+            'authcode' => $params['auth_code'] ?? '', // 支付授权码-如微信,支付宝,银联的付款二维码 - 否-32
+            'body'     => $params['title'] ?? '', // 订单标题-订单商品名称，为空则以商户名作为商品名称-是-100-最大100个字节(50个中文字符)-
+            'remark'   => $params['remark'] ?? '', // 备注-备注信息-是-160-最大160个字节(80个中文字符)禁止出现+，空格，/，?，%，#，&，=这几类特殊符号
 
             'goods_tag'     => $params['goods_tag'] ?? '', // 订单支付标识-订单优惠标记，用于区分订单是否可以享受优惠，字段内容在微信后台配置券时进行设置，说明详见代金券或立减优惠-是-32-只对微信支付有效W01交易方式不支持
             'benefitdetail' => $params['benefit_detail'], // 优惠信息-Benefitdetail的json字符串,注意是String-是-不限制-仅支持微信单品优惠、W01交易方式不支持、支付宝智慧门店/支付宝单品优惠
@@ -207,15 +206,16 @@ class UnionPay
              */
             'asinfo'        => $params['as_info'] ?? '',
 
-            'fqnum'    => $params['fq_num'] ?? '', // 花呗分期- 6 花呗分期6期/12 花呗分期12期 - 是-4 - 暂只支持支付宝花呗分期仅支持A01/A02
+            'fqnum' => $params['fq_num'] ?? '', // 花呗分期- 6 花呗分期6期/12 花呗分期12期 - 是-4 - 暂只支持支付宝花呗分期仅支持A01/A02
         ];
 
-        $paramsStr    = $this->getParamsStr($params);
-        $endPoint = $this->getEndPoint('scanqrpay', $isDebug);
+        $paramsStr = $this->getParamsStr($data);
+        $endPoint  = $this->getEndPoint('scanqrpay', $isDebug);
 
         $result = $this->client->requestApi($endPoint, [], $paramsStr, $this->headers, true);
 
-        return $this->handleResult($result);
+        dd($result);
+        // return $this->handleResult($result);
     }
 
     /**
@@ -285,7 +285,8 @@ class UnionPay
 
         $endPoint  = $this->getEndPoint('query', $isDebug);
         $paramsStr = $this->getParamsStr($params);
-        $result    = $this->client->requestApi($endPoint, [], $paramsStr, $this->headers, true);
+
+        $result = $this->client->requestApi($endPoint, [], $paramsStr, $this->headers, true);
 
         return $this->handleResult($result);
     }
@@ -302,8 +303,8 @@ class UnionPay
     public function getAuthCodeToUserId($authCode, $authType, $extraParams = [], $isDebug = false)
     {
         $params = [
-            'auth_code' => $authCode, // 授权码（付款码）
-            'auth_type' => $authType, // 授权码类型 01-微信付款码 02-银联userAuth
+            'authcode' => $authCode, // 授权码（付款码）
+            'authtype' => $authType, // 授权码类型 01-微信付款码 02-银联userAuth
             'sub_appid' => $extraParams['sub_appid'] ?? '' // 微信支付appid - 针对01有效
         ];
 
@@ -355,7 +356,7 @@ class UnionPay
      * @param $isDebug
      * @throws Exception
      */
-    private function close($orderNo, $oldTrxId = '', $isDebug = false)
+    public function close($orderNo, $oldTrxId = '', $isDebug = false)
     {
         $params = [
             // oldreqsn和oldtrxid必填其一 //建议:商户如果同时拥有oldtrxid和oldreqsn,优先使用oldtrxid
@@ -371,26 +372,79 @@ class UnionPay
     }
 
     /**
+     * 获取交易类型列表
+     *
+     * @return array
+     */
+    public function getTrxCodeList()
+    {
+        $list = [
+            ['code' => 'VSP501', 'name' => '微信支付'],
+            ['code' => 'VSP502', 'name' => '微信支付撤销'],
+            ['code' => 'VSP503', 'name' => '微信支付退款'],
+            ['code' => 'VSP505', 'name' => '手机QQ 支付'],
+            ['code' => 'VSP506', 'name' => '手机QQ支付撤销'],
+            ['code' => 'VSP507', 'name' => '手机QQ支付退款'],
+            ['code' => 'VSP511', 'name' => '支付宝支付'],
+            ['code' => 'VSP512', 'name' => '支付宝支付撤销'],
+            ['code' => 'VSP513', 'name' => '支付宝支付退款'],
+            ['code' => 'VSP541', 'name' => '扫码支付'],
+            ['code' => 'VSP542', 'name' => '扫码撤销'],
+            ['code' => 'VSP543', 'name' => '扫码退货'],
+            ['code' => 'VSP551', 'name' => '银联扫码支付'],
+            ['code' => 'VSP552', 'name' => '银联扫码撤销'],
+            ['code' => 'VSP553', 'name' => '银联扫码退货'],
+            ['code' => 'VSP907', 'name' => '差错借记调整'],
+            ['code' => 'VSP908', 'name' => '差错贷记调整']
+        ];
+
+        return $list;
+    }
+
+    /**
+     * 获取交易方式列表
+     *
+     * @return array
+     */
+    public function getPayTypeList()
+    {
+        $list = [
+            ['code' => 'W01', 'name' => '微信扫码支付'],
+            ['code' => 'W02', 'name' => '微信JS支付'],
+            ['code' => 'W06', 'name' => '微信小程序支付'],
+            ['code' => 'A01', 'name' => '支付宝扫码支付'],
+            ['code' => 'A02', 'name' => '支付宝JS支付'],
+            ['code' => 'A03', 'name' => '支付宝APP支付'],
+            ['code' => 'Q01', 'name' => '手机QQ扫码支付'],
+            ['code' => 'Q02', 'name' => '手机QQ JS支付'],
+            ['code' => 'U01', 'name' => '银联扫码支付(CSB)'],
+            ['code' => 'U02', 'name' => '银联JS支付'],
+        ];
+
+        return $list;
+    }
+
+    /**
      * 整合提交的参数
      *
      * @param $data
-     * @throws Exception
      * @return mixed
+     * @throws Exception
      */
     private function getParamsStr($params)
     {
         $publicParams = [
-            'orgid'     => $this->orgid, // 机构号-代为发起交易的机构商户号-否-15
-            'cusid'     => $this->cusId, // 商户号-实际交易的商户号-否-15
+            // 'orgid'     => $this->orgId, // 机构号-代为发起交易的机构商户号-否-15
             'appid'     => $this->appId, // 应用ID-平台分配的APPID-否-8
-            'version'   => $this->apiVersion, // 版本号-接口版本号-否-2
-            'randomstr' => $params['random_str'] ?? uniqid('', true),
+            'cusid'     => $this->cusId, // 商户号-实际交易的商户号-否-15
+            'randomstr' => time(),
             'signtype'  => $params['sign_type'] ?? 'RSA',
+            'version'   => $this->apiVersion, // 版本号-接口版本号-否-2
         ];
 
-        $params         = array_merge($publicParams, $params);
+        $params         = array_merge($publicParams, array_filter($params));
         $params['sign'] = $this->getSign($params);
-        $paramsStr      = $this->ToUrlParams($params);
+        $paramsStr      = Utility::ToUrlParams($params);
 
         return $paramsStr;
     }
@@ -403,24 +457,42 @@ class UnionPay
      */
     private function handleResult($result)
     {
-        $rspArray = json_decode($result, true);
+        $code    = 0;
+        $data    = [];
+        $retCode = $result['retcode'] ?? '';
+        $message = $result['retmsg'] ?? '';
 
-        // todo 返回结果
-        if (!validSign($rspArray)) {
+        if ($retCode == 'FAIL' || !$retCode) {
+            $code = -1;
+        } else {
+            // 验证通联支付签名
+            $validateResult = Utility::validUnionPaySign($result, $this->publicKey);
+
+            if (!$validateResult) {
+                $code    = -1;
+                $signRsp = strtolower($result["sign"]);
+                $message = "验签失败:" . $signRsp;
+            } else {
+                $message = '成功';
+            }
+
+            $data = $result;
         }
+
+        return ['code' => $code, 'message' => $message, 'data' => $data];
     }
 
     /**
      * 获取签名
      *
      * @param array $array
-     * @throws Exception
      * @return string
+     * @throws Exception
      */
     protected function getSign(array $array)
     {
         ksort($array);
-        $bufSignSrc = $this->toUrlParams($array);
+        $bufSignSrc = Utility::toUrlParams($array);
 
         $privateKey = chunk_split($this->privateKey, 64, "\n");
         $key        = "-----BEGIN RSA PRIVATE KEY-----\n" . wordwrap($privateKey) . "-----END RSA PRIVATE KEY-----";
@@ -431,25 +503,6 @@ class UnionPay
 
         $sign = base64_encode($signature);//加密后的内容通常含有特殊字符，需要编码转换下，在网络间通过url传输时要注意base64编码是否是url安全的
 
-        return $sign;
-    }
-
-    /**
-     * 处理URL参数
-     *
-     * @param $array
-     * @return string
-     */
-    private function toUrlParams($array)
-    {
-        $buff = "";
-        foreach ($array as $k => $v) {
-            if ($v != "" && !is_array($v)) {
-                $buff .= $k . "=" . $v . "&";
-            }
-        }
-
-        $buff = trim($buff, "&");
-        return $buff;
+        return urlencode($sign); // 需要进行url编码，不然接口会报签名错误
     }
 }

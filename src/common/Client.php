@@ -1,6 +1,6 @@
 <?php
 
-namespace Sxqibo\FastPayment;
+namespace Sxqibo\FastPayment\common;
 
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\GuzzleException;
@@ -11,7 +11,7 @@ use Exception;
 
 class Client
 {
-    private $timeout = 30;
+    private       $timeout = 30;
     public static $clientInstance;
 
     public function __construct()
@@ -27,8 +27,8 @@ class Client
      * @param array $body
      * @param array $headers
      * @param false $raw
-     * @throws Exception
      * @return array|mixed
+     * @throws Exception
      */
     public function requestApi($endPoint, $query = [], $body = null, $headers = [], $raw = false)
     {

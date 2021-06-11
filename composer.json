@@ -7,11 +7,6 @@
       "Sxqibo\\FastPayment\\": "src/"
     }
   },
-  "autoload-dev": {
-    "psr-4": {
-      "Sxqibo\\FastPayment\\Tests\\": "tests/"
-    }
-  },
   "authors": [
     {
       "name": "weifeng",
@@ -21,6 +16,5 @@
   "require": {
     "php": ">=7.0",
     "guzzlehttp/guzzle": "~6.0"
-  },
-  "minimum-stability": "dev"
+  }
 }
