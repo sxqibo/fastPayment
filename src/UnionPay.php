@@ -303,8 +303,8 @@ class UnionPay
     public function getAuthCodeToUserId($authCode, $authType, $extraParams = [], $isDebug = false)
     {
         $params = [
-            'authcode' => $authCode, // 授权码（付款码）
-            'authtype' => $authType, // 授权码类型 01-微信付款码 02-银联userAuth
+            'authcode'  => $authCode, // 授权码（付款码）
+            'authtype'  => $authType, // 授权码类型 01-微信付款码 02-银联userAuth
             'sub_appid' => $extraParams['sub_appid'] ?? '' // 微信支付appid - 针对01有效
         ];
 
@@ -473,10 +473,14 @@ class UnionPay
                 $signRsp = strtolower($result["sign"]);
                 $message = "验签失败:" . $signRsp;
             } else {
-                $message = '成功';
+                $data = $result;
+                if ($data['trxstatus'] == 0000) { // 交易成功
+                    $message = '成功';
+                } else {
+                    $code    = -1;
+                    $message = $data['errmsg'] ?? '';
+                }
             }
-
-            $data = $result;
         }
 
         return ['code' => $code, 'message' => $message, 'data' => $data];
