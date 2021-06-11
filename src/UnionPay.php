@@ -96,8 +96,8 @@ class UnionPay
             ],
             'close'               => [
                 'method' => 'POST',
-                'uri'    => '/订单关闭',
-                'remark' => '微信人脸授权码获取'
+                'uri'    => '/close',
+                'remark' => '订单关闭'
             ]
         ];
 
