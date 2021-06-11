@@ -179,6 +179,7 @@ class UnionPay
      */
     public function scanqrpay($params, $isDebug = false)
     {
+        // 注释格式：参数-参数名称-取值-可空-最大长度-备注
         $data = [
             'trxamt'   => $params['amount'], // 交易金额-单位为分-否-15
             'reqsn'    => $params['order_no'], // 商户交易单号-商户的交易订单号-否-32
@@ -214,8 +215,7 @@ class UnionPay
 
         $result = $this->client->requestApi($endPoint, [], $paramsStr, $this->headers, true);
 
-        dd($result);
-        // return $this->handleResult($result);
+        return $this->handleResult($result);
     }
 
     /**

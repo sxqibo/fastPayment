@@ -20,7 +20,7 @@ $result       = $service->cancel($refundNo, $refundAmount, ['old_order_no' => 'T
 // 2. 交易退款 - 当天交易请用撤销,非当天交易才用此退货接口
 $refundNo     = 'R123123';
 $refundAmount = 1000; // 分
-$result       = $service->refund($refundNo, $refundAmount);
+$result       = $service->refund($refundNo, $refundAmount, ['old_order_no' => 'T1623394747']);
 
 // 3. 交易查询
 $orderNo = '1234';
