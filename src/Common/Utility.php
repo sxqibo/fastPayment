@@ -1,6 +1,6 @@
 <?php
 
-namespace Sxqibo\FastPayment\common;
+namespace Sxqibo\FastPayment\Common;
 
 
 class Utility

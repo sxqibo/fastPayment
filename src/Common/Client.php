@@ -1,6 +1,6 @@
 <?php
 
-namespace Sxqibo\FastPayment\common;
+namespace Sxqibo\FastPayment\Common;
 
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\GuzzleException;
@@ -13,10 +13,11 @@ class Client
 {
     private       $timeout = 30;
     public static $clientInstance;
+    protected     $wechatpayMiddleware;
 
-    public function __construct()
+    public function __construct($wechatpayMiddleware = [])
     {
-        $this->baseUri = '';
+        $this->wechatpayMiddleware = $wechatpayMiddleware;
     }
 
     /**
@@ -52,7 +53,7 @@ class Client
                 }
             }
 
-            $client   = $this->getClient();
+            $client   = $this->getClient($this->wechatpayMiddleware);
             $response = $client->request($endPoint['method'], $endPoint['url'], $options);
 
             $body = $response->getBody();
@@ -92,13 +93,18 @@ class Client
     /**
      * @return mixed
      */
-    protected function getClient()
+    protected function getClient($wechatpayMiddleware)
     {
         if (!isset(static::$clientInstance)) {
             $handlerStack = HandlerStack::create(new CurlHandler());
             $handlerStack->push(Middleware::retry($this->retryDecider(), $this->retryDelay()));
 
-            static::$clientInstance = new \GuzzleHttp\Client(['base_uri' => $this->baseUri, 'handler' => $handlerStack]);
+            // todo 判断微信中间件是否存在
+            if ($wechatpayMiddleware) {
+                $handlerStack->push($wechatpayMiddleware, 'wechatpay');
+            }
+
+            static::$clientInstance = new \GuzzleHttp\Client(['handler' => $handlerStack]);
         }
 
         return static::$clientInstance;

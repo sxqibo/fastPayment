@@ -16,6 +16,7 @@
   ],
   "require": {
     "php": ">=7.0",
-    "guzzlehttp/guzzle": "~6.0"
+    "guzzlehttp/guzzle": "~6.0",
+    "wechatpay/wechatpay-guzzle-middleware": "^0.2.2"
   }
 }

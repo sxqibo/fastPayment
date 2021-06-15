@@ -13,7 +13,7 @@ if (count($params) < 1) {//如果参数为空,则不进行处理
     exit();
 }
 
-if (\Sxqibo\FastPayment\common\Utility::validUnionPaySign($params, $publicKey)) {//验签成功
+if (\Sxqibo\FastPayment\Common\Utility::validUnionPaySign($params, $publicKey)) {//验签成功
     //此处进行业务逻辑处理
     echo "success";
 } else {

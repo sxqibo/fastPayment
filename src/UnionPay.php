@@ -3,9 +3,9 @@
 
 namespace Sxqibo\FastPayment;
 
-use Sxqibo\FastPayment\common\Client;
+use Sxqibo\FastPayment\Common\Client;
 use Exception;
-use Sxqibo\FastPayment\common\Utility;
+use Sxqibo\FastPayment\Common\Utility;
 
 /**
  * 通联支付类
