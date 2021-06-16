@@ -66,7 +66,7 @@ class BaseService
             // 平台证书获取
             $wechatpayCertificate              = $this->getWechatpayCertificate($merchantPrivateKey);
             $this->config['cert_public']       = $wechatpayCertificate;
-            $certificateSerialNo               = PemUtil::parseCertificateSerialNo($this->config['cert_public']);
+            $certificateSerialNo               = PemUtil::parseCertificateSerialNo($wechatpayCertificate);
             $this->headers['Wechatpay-Serial'] = $certificateSerialNo; // 平台证书证书序列号
 
             // 构造一个WechatPayMiddleware
@@ -141,9 +141,9 @@ class BaseService
             $encryptCertificate['nonce'], $encryptCertificate['ciphertext']);
 
         // 存入缓存
-        Cache::setCache($serialNo, base64_encode($data), 7200);
+        Cache::setCache($serialNo, base64_encode($data), 36000); // 10小时有效期
 
-        return true;
+        return $data;
     }
 
 }
