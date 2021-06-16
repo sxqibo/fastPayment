@@ -14,10 +14,18 @@ class Client
     private       $timeout = 30;
     public static $clientInstance;
     protected     $wechatpayMiddleware;
+    protected     $options = [
+        'wechatMiddleware' => ''
+    ];
 
-    public function __construct($wechatpayMiddleware = [])
+    public function __construct($options = [])
     {
-        $this->wechatpayMiddleware = $wechatpayMiddleware;
+        if (!empty($options)) {
+            if (!empty($options['wechatMiddleware'])) {
+                $this->options['wechatMiddleware'] = $options['wechatMiddleware'];
+            }
+        }
+
     }
 
     /**
@@ -53,7 +61,7 @@ class Client
                 }
             }
 
-            $client   = $this->getClient($this->wechatpayMiddleware);
+            $client   = $this->getClient();
             $response = $client->request($endPoint['method'], $endPoint['url'], $options);
 
             $body = $response->getBody();
@@ -93,15 +101,15 @@ class Client
     /**
      * @return mixed
      */
-    protected function getClient($wechatpayMiddleware)
+    protected function getClient()
     {
         if (!isset(static::$clientInstance)) {
             $handlerStack = HandlerStack::create(new CurlHandler());
             $handlerStack->push(Middleware::retry($this->retryDecider(), $this->retryDelay()));
 
-            // todo 判断微信中间件是否存在
-            if ($wechatpayMiddleware) {
-                $handlerStack->push($wechatpayMiddleware, 'wechatpay');
+            // 判断微信中间件是否存在
+            if (!empty($this->options['wechatMiddleware'])) {
+                $handlerStack->push($this->options['wechatMiddleware'], 'wechatpay');
             }
 
             static::$clientInstance = new \GuzzleHttp\Client(['handler' => $handlerStack]);

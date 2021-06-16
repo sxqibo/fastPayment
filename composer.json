@@ -1,7 +1,11 @@
 {
   "name": "sxqibo/fast-payment",
-  "description": "通联支付网上收银统一下单接口，提供统一支付、统一扫码、交易查询、推送通知、退款等功能",
+  "description": "通联支付网上收银统一下单接口，提供统一支付、统一扫码、交易查询、推送通知、退款等功能，新增微信批量转账和查询功能",
   "type": "library",
+  "keywords": [
+    "union",
+    "wechatpay"
+  ],
   "license": "MIT",
   "autoload": {
     "psr-4": {

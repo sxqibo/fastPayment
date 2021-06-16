@@ -43,4 +43,34 @@ class Utility
 
         return $result;
     }
+
+    /**
+     * 获取微信支付加密签名
+     *
+     * @param $str
+     * @param $publicKeyPath string 平台证书路径
+     * @return string
+     */
+    public static function getWePayEncrypt($str, $certpublic)
+    {
+        //$str是待加密字符串
+        if (stripos($certpublic, '-----BEGIN CERTIFICATE-----') === false) {
+            if (file_exists($certpublic)) {
+                $publicKey = file_get_contents($certpublic);
+            } else {
+                throw new \Exception("File Non-Existent -- [cert_private]");
+            }
+        } else {
+            $publicKey = $certpublic;
+        }
+
+        $encrypted = '';
+        if (openssl_public_encrypt($str, $encrypted, $publicKey, OPENSSL_PKCS1_OAEP_PADDING)) {
+            //base64编码
+            $sign = base64_encode($encrypted);
+        } else {
+            throw new \Exception('encrypt failed');
+        }
+        return $sign;
+    }
 }
