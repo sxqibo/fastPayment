@@ -25,12 +25,14 @@ class BaseService
      * @var array
      */
     protected $config = [
-        'appid'              => '', // 微信绑定APPID，需配置
-        'mch_id'             => '', // 微信商户编号，需要配置
-        'mch_v3_key'         => '', // 微信商户密钥，需要配置
-        'cert_private'       => '', // 商户密钥内容，需要配置
-        'cert_serial_number' => '', // 商户API证书序列号,需要配置
-        'cert_public'        => '', // 平台证书,不需要配置
+        'appid'        => '', // 微信绑定APPID，需配置
+        'mch_id'       => '', // 微信商户编号，需要配置
+        'mch_v3_key'   => '', // 微信商户密钥，需要配置
+        'cert_private' => '', // 商户私钥内容，需要配置
+        'cert_public'  => '', // 商户公钥内容,需要配置
+
+        'cert_serial_number' => '', // 商户API证书序列号,无需配置
+        'platform_public'    => '', // 平台证书，无需配置
     ];
 
     /**
@@ -54,25 +56,48 @@ class BaseService
             if (empty($options['cert_private'])) {
                 throw new InvalidArgumentException("Missing Config -- [cert_private]");
             }
+            if (empty($options['cert_public'])) {
+                throw new InvalidArgumentException("Missing Config -- [cert_public]");
+            }
 
-            $this->config['appid']              = isset($options['appid']) ? $options['appid'] : '';
-            $this->config['mch_id']             = $options['mch_id'];
-            $this->config['mch_v3_key']         = $options['mch_v3_key'];
-            $this->config['cert_private']       = $options['cert_private'];
-            $this->config['cert_serial_number'] = $options['cert_serial_number']; // 商户API证书序列号
+            if (stripos($options['cert_public'], '-----BEGIN CERTIFICATE-----') === false) {
+                if (file_exists($options['cert_public'])) {
+                    $options['cert_public'] = file_get_contents($options['cert_public']);
+                } else {
+                    throw new InvalidArgumentException("File Non-Existent -- [cert_public]");
+                }
+            }
 
-            $merchantPrivateKey = PemUtil::loadPrivateKey($options['cert_private']); // 商户私钥
+            if (stripos($options['cert_private'], '-----BEGIN PRIVATE KEY-----') === false) {
+                if (file_exists($options['cert_private'])) {
+                    $options['cert_private'] = file_get_contents($options['cert_private']);
+                } else {
+                    throw new InvalidArgumentException("File Non-Existent -- [cert_private]");
+                }
+            }
+
+            $this->config['appid']        = isset($options['appid']) ? $options['appid'] : '';
+            $this->config['mch_id']       = $options['mch_id'];
+            $this->config['mch_v3_key']   = $options['mch_v3_key'];
+            $this->config['cert_private'] = $options['cert_private'];
+            $this->config['cert_public']  = $options['cert_public'];
+            // 商户API证书序列号
+            $this->config['cert_serial_number'] = openssl_x509_parse($this->config['cert_public'])['serialNumberHex'];
+            if (empty($this->config['cert_serial_number'])) {
+                throw new InvalidArgumentException("Failed to parse certificate public key");
+            }
 
             // 平台证书获取
+            $merchantPrivateKey                = openssl_get_privatekey($options['cert_private']); // 商户私钥
             $wechatpayCertificate              = $this->getWechatpayCertificate($merchantPrivateKey);
-            $this->config['cert_public']       = $wechatpayCertificate;
+            $this->config['platform_public']   = $wechatpayCertificate;
             $certificateSerialNo               = PemUtil::parseCertificateSerialNo($wechatpayCertificate);
             $this->headers['Wechatpay-Serial'] = $certificateSerialNo; // 平台证书证书序列号
 
             // 构造一个WechatPayMiddleware
             $wechatpayCertificate = \openssl_x509_read($wechatpayCertificate); //  微信支付平台证书
             $wechatpayMiddleware  = WechatPayMiddleware::builder()
-                ->withMerchant($options['mch_id'], $options['cert_serial_number'], $merchantPrivateKey) // 传入商户相关配置
+                ->withMerchant($options['mch_id'], $this->config['cert_serial_number'], $merchantPrivateKey) // 传入商户相关配置
                 ->withWechatPay([$wechatpayCertificate]) // 可传入多个微信支付平台证书，参数类型为array
                 ->build();
 
