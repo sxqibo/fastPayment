@@ -33,7 +33,7 @@ class Transfer extends BaseService
                 'transfer_amount' => $item['transfer_amount'], // 转账金额 - 转账金额单位为分
                 'transfer_remark' => $item['transfer_remark'], //转账备注 - 单条转账备注（微信用户会收到该备注），UTF8编码，最多允许32个字符
                 'openid'          => $item['openid'], // 用户在直连商户应用下的用户标示 - 用户在直连商户appid下的唯一标识
-                'user_name'       => Utility::getWePayEncrypt($item['user_name'], $this->config['platform_public']), // 收款用户姓名 - 1、收款方姓名。采用标准RSA算法，公钥由微信侧提供 2、该字段需进行加密处理，加密方法详见敏感信息加密说明。(提醒：必须在HTTP头中上送Wechatpay-Serial)
+                'user_name'       => Utility::getEncryptData($item['user_name'], $this->config['platform_public']), // 收款用户姓名 - 1、收款方姓名。采用标准RSA算法，公钥由微信侧提供 2、该字段需进行加密处理，加密方法详见敏感信息加密说明。(提醒：必须在HTTP头中上送Wechatpay-Serial)
             ];
         }
         $newData = [

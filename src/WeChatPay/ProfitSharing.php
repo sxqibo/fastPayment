@@ -98,7 +98,7 @@ class ProfitSharing extends BaseService
             // 判断接收方是否是个人
             if ($item['type'] == 'PERSONAL_OPENID') {
                 // 分账个人接收方姓名
-                $temp['name'] = Utility::getWePayEncrypt($temp['name'], $this->config['platform_public']);
+                $temp['name'] = Utility::getEncryptData($temp['name'], $this->config['platform_public']);
             }
 
             $newReceivers[] = $temp;
@@ -276,7 +276,7 @@ class ProfitSharing extends BaseService
          * 1、此字段需要加密,加密方法详见：敏感信息加密说明
          */
         // 分账个人接收方姓名
-        !empty($data['name']) && $newData['name'] = Utility::getWePayEncrypt($data['name'], $this->config['platform_public']);
+        !empty($data['name']) && $newData['name'] = Utility::getEncryptData($data['name'], $this->config['platform_public']);
 
         $newData = json_encode($newData);
         $result  = $this->client->requestApi($endPoint, [], $newData, $this->headers, true);
