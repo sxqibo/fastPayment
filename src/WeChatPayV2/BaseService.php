@@ -45,9 +45,7 @@ class BaseService
      */
     public function __construct(array $options = [])
     {
-        if (empty($options['appid'])) {
-            throw new InvalidArgumentException("Missing Config -- [appid]");
-        }
+
         if (empty($options['mch_id'])) {
             throw new InvalidArgumentException("Missing Config -- [mch_id]");
         }
@@ -58,12 +56,15 @@ class BaseService
         $this->config = new DataArray($options);
         // 商户基础参数
         $this->params = new DataArray([
-            'appid'     => $this->config->get('appid'),
             'mch_id'    => $this->config->get('mch_id'),
             'nonce_str' => Utility::createNoncestr(),
         ]);
 
+
         // 商户参数支持
+        if ($this->config->get('appid')) {
+            $this->params->set('appid', $this->config->get('appid'));
+        }
         if ($this->config->get('sub_appid')) {
             $this->params->set('sub_appid', $this->config->get('sub_appid'));
         }
@@ -81,9 +82,9 @@ class BaseService
      * @param bool $isCert 是否需要使用双向证书
      * @param string $signType 数据签名类型 MD5|SHA256
      * @param bool $needSignType 是否需要传签名类型参数
-     * @return array
      * @throws InvalidResponseException
      * @throws \WeChat\Exceptions\LocalCacheException
+     * @return array
      */
     protected function callPostApi($url, array $data, $isCert = false, $signType = 'HMAC-SHA256')
     {
@@ -100,7 +101,7 @@ class BaseService
             }
         }
 
-        $params         = $this->params->merge($data);
+        $params = $this->params->merge($data);
         $params['sign'] = $this->getPaySign($params, $signType);
 
         $result = $this->post($url, Utility::arr2xml($params), $option);
@@ -114,8 +115,8 @@ class BaseService
      * @param string $url 访问URL
      * @param array $data POST数据
      * @param array $options
-     * @return boolean|string
      * @throws LocalCacheException
+     * @return boolean|string
      */
     public function post($url, $data = [], $options = [])
     {
@@ -129,8 +130,8 @@ class BaseService
      * @param string $method 请求方法
      * @param string $url 请求方法
      * @param array $options 请求参数[headers,data,ssl_cer,ssl_key]
-     * @return boolean|string
      * @throws LocalCacheException
+     * @return boolean|string
      */
     public function doRequest($method, $url, $options = [])
     {
@@ -192,6 +193,138 @@ class BaseService
             return strtoupper(md5($buff));
         }
         return strtoupper(hash_hmac('SHA256', $buff, $this->config->get('mch_key')));
+    }
+
+    /**
+     * 公钥加密，银行卡号和姓名需要RSA算法加密
+     * @param string $data 需要加密的字符串，银行卡/姓名
+     * @return null|string  加密后的字符串
+     */
+    public function encryptSensitiveInformation(string $string)
+    {
+        $certificates = $this->config->get('pub_cer');
+
+        if (null === $certificates) {
+            throw new InvalidArgumentException('config certificate connot be empty.');
+        }
+
+        $encrypted         = '';
+        $publicKeyResource = openssl_get_publickey(file_get_contents($certificates));
+
+        $f = openssl_public_encrypt($string, $encrypted, $publicKeyResource, OPENSSL_PKCS1_OAEP_PADDING);
+        openssl_free_key($publicKeyResource);
+        if ($f) {
+            return base64_encode($encrypted);
+        }
+
+        throw new InvalidArgumentException('Encryption of sensitive information failed');
+    }
+
+
+    /*
+  * 获取公钥,格式为PKCS#1 转PKCS#8
+  * openssl rsa -RSAPublicKey_in -in  <filename> -out <out_put_filename>
+  * */
+    public function getPublicKey()
+    {
+        $data = [
+            //商户号
+            "mch_id"    => $this->config->get('mch_id'),
+            //随机字符串
+            "nonce_str" => Utility::createNoncestr(),
+            //加密方式我是MD5
+            "sign_type" => "MD5",
+        ];
+        //微信签名
+        $data["sign"] = $this->getPaySign($data);
+        //提交到的URL
+        $url = "https://fraud.mch.weixin.qq.com/risk/getpublickey";
+
+        $option            = [];
+        $option['ssl_cer'] = $this->config->get('ssl_cer');
+        $option['ssl_key'] = $this->config->get('ssl_key');
+
+        if (empty($option['ssl_cer']) || !file_exists($option['ssl_cer'])) {
+            throw new InvalidArgumentException("Missing Config -- ssl_cer", '0');
+        }
+        if (empty($option['ssl_key']) || !file_exists($option['ssl_key'])) {
+            throw new InvalidArgumentException("Missing Config -- ssl_key", '0');
+        }
+
+        //转换成XML格式POST到服务器
+        $backxml = $this->post($url, Utility::arr2xml($data), $option);
+        //将获取到的内容解析成对象
+        $backarr = simplexml_load_string($backxml, 'SimpleXMLElement', LIBXML_NOCDATA);
+        //转换成数组
+        $jsonStr   = json_encode($backarr);
+        $jsonArray = json_decode($jsonStr, true);
+        //保存成PEM文件
+        file_put_contents("apiCertPubKey.pem", $backarr->pub_key);
+    }
+
+
+    /*
+  * 银行编号列表，详情参考：https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=24_4
+  * @params string $bank_name : 银行名称，4个汉字
+  * return int $bank_code : 银行编码
+  * */
+    private function getBankCode($bank_name)
+    {
+        $bank_code = 0;
+        switch ($bank_name) {
+            case '工商银行':
+                $bank_code = 1002;
+                break;
+            case '农业银行':
+                $bank_code = 1005;
+                break;
+            case '中国银行':
+                $bank_code = 1026;
+                break;
+            case '建设银行':
+                $bank_code = 1003;
+                break;
+            case '招商银行':
+                $bank_code = 1001;
+                break;
+            case '邮储银行':
+                $bank_code = 1066;
+                break;
+            case '交通银行':
+                $bank_code = 1020;
+                break;
+            case '浦发银行':
+                $bank_code = 1004;
+                break;
+            case '民生银行':
+                $bank_code = 1006;
+                break;
+            case '兴业银行':
+                $bank_code = 1009;
+                break;
+            case '平安银行':
+                $bank_code = 1010;
+                break;
+            case '中信银行':
+                $bank_code = 1021;
+                break;
+            case '华夏银行':
+                $bank_code = 1025;
+                break;
+            case '广发银行':
+                $bank_code = 1027;
+                break;
+            case '光大银行':
+                $bank_code = 1022;
+                break;
+            case '北京银行':
+                $bank_code = 1032;
+                break;
+            case '宁波银行':
+                $bank_code = 1056;
+                break;
+        }
+        return $bank_code;
     }
 
     /**
