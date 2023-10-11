@@ -22,7 +22,7 @@ final class ScanPayService
         }
 
         // 对指定字段进行生成签名
-        $request = $scanPayModel->getDate();
+        $request = $scanPayModel->getData();
         $signData = $scanPayModel->getSignData();
         $request['signMsg'] = $this->buildSign($signData, $scanPayModel->privateKey);
 

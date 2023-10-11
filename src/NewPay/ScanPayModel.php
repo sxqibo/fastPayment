@@ -2,7 +2,6 @@
 
 namespace Sxqibo\FastPayment\NewPay;
 
-use Exception;
 use ReflectionClass;
 
 final class ScanPayModel
@@ -80,9 +79,9 @@ final class ScanPayModel
         $this->submitTime = date('YmdHis', time());
         $this->payType = self::PAY_TYPE;
         // 此处从配置读
-        $this->tranIP = '';
+        $this->tranIP = '114.114.114.114';
         // 此处从配置读
-        $this->notifyUrl = '';
+        $this->notifyUrl = 'http://xxx.xxx.com/xxx';
         $this->charset = self::CHARSET;
         $this->signType = self::SIGNTYPE_RSA;
     }
@@ -127,7 +126,7 @@ final class ScanPayModel
      *
      * @return array
      */
-    public function getDate()
+    public function getData()
     {
         $data = [];
 
@@ -186,6 +185,6 @@ final class ScanPayModel
 
     public function getSignData(): string
     {
-        return Util::getStringData(self::SIGN_FIELD, $this->getDate());
+        return Util::getStringData(self::SIGN_FIELD, $this->getData());
     }
 }

@@ -48,18 +48,18 @@ final class ScanPayQueryModel
         'endTime', 'partnerID', 'remark', 'charset', 'signType'
     ];
 
-    private $version;
-    private $serialID;
-    private $mode;
-    private $type;
-    private $orderID;
-    private $beginTime;
-    private $endTime;
-    private $partnerID;
-    private $remark;
-    private $charset;
-    private $signType;
-    private $signMsg;
+    private $version = '';
+    private $serialID = '';
+    private $mode = '';
+    private $type = '';
+    private $orderID = '';
+    private $beginTime = '';
+    private $endTime = '';
+    private $partnerID = '';
+    private $remark = '';
+    private $charset = '';
+    private $signType = '';
+    private $signMsg = '';
 
     private $privateKey;
 
@@ -68,10 +68,6 @@ final class ScanPayQueryModel
         $this->version = self::VERSION;
         $this->charset = self::CHARSET;
         $this->signType = self::SIGNTYPE_RSA;
-
-        $this->beginTime = '';
-        $this->endTime = '';
-        $this->remark = '';
     }
 
     public function setPrivateKey(string $privateKey)
