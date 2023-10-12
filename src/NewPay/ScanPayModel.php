@@ -126,7 +126,7 @@ final class ScanPayModel
      *
      * @return array
      */
-    public function getData()
+    public function getData(): array
     {
         $data = [];
 

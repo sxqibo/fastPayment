@@ -9,11 +9,13 @@ final class SinglePayQueryService
 
     public function query(SinglePayQueryModel $singlePayQueryModel)
     {
+        $data = $singlePayQueryModel->getData();
         $signParam = Util::getStringData(SinglePayQueryModel::SIGN_FIELD, $singlePayQueryModel->getData());
 
-        $this->buildSign($signParam, $singlePayQueryModel->privateKey);
+//        $data['signValue'] = $this->buildSign($signParam, $singlePayQueryModel->privateKey);
+        $data['signValue'] = RsaUtil::buildSignForBase64($signParam, $singlePayQueryModel->privateKey);
 
-        $content = HttpUtil::post($singlePayQueryModel->getData(), SinglePayQueryModel::REQUEST_URL);
+        $content = HttpUtil::post($data, SinglePayQueryModel::REQUEST_URL);
 
         $content = json_decode($content, true);
 
@@ -31,32 +33,12 @@ final class SinglePayQueryService
     }
 
     /**
-     * 生成签名
-     *  发送数据时的签名
-     *
-     * @param $request
-     * @param $privateKey
-     * @return string
-     * @throws \Exception
-     */
-    public function buildSign($request, $privateKey): string
-    {
-        // 付款公私钥/商户私钥（付款）.pem
-        // 计算签名
-        $res = openssl_get_privatekey($privateKey);
-
-        openssl_sign($request, $signature, $res, OPENSSL_ALGO_SHA1);
-
-        return base64_encode($signature);
-    }
-
-    /**
      * 对返回值验签
      *
      * @param $data
      * @param $publicKey
      * @return bool
-     * @throws Exception
+     * @throws \Exception
      */
     public function verifySign($data, $publicKey): bool
     {

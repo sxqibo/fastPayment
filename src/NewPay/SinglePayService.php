@@ -26,7 +26,8 @@ final class SinglePayService
 
         // 付款公私钥/商户私钥（付款）.pem
         // 计算签名
-        $request['signValue'] = $this->buildSign($singlePayModel->getSignData(), $singlePayModel->privateKey);
+//        $request['signValue'] = $this->buildSign($singlePayModel->getSignData(), $singlePayModel->privateKey);
+        $request['signValue'] = RsaUtil::buildSignForBase64($singlePayModel->getSignData(), $singlePayModel->privateKey);
 
         $content = HttpUtil::post($request, SinglePayModel::REQUEST_URL);
 
@@ -79,26 +80,6 @@ final class SinglePayService
         }
 
         return base64_encode($crypto);
-    }
-
-    /**
-     * 生成签名
-     *  发送数据时的签名
-     *
-     * @param $request
-     * @param $privateKey
-     * @return string
-     * @throws \Exception
-     */
-    public function buildSign($request, $privateKey): string
-    {
-        // 付款公私钥/商户私钥（付款）.pem
-        // 计算签名
-        $res = openssl_get_privatekey($privateKey);
-
-        openssl_sign($request, $signature, $res, OPENSSL_ALGO_SHA1);
-
-        return base64_encode($signature);
     }
 
 }

@@ -24,7 +24,7 @@ final class ScanPayService
         // 对指定字段进行生成签名
         $request = $scanPayModel->getData();
         $signData = $scanPayModel->getSignData();
-        $request['signMsg'] = $this->buildSign($signData, $scanPayModel->privateKey);
+        $request['signMsg'] = RsaUtil::buildSignForBin2Hex($signData, $scanPayModel->privateKey);
 
         // post请求接口
         $content = HttpUtil::post($request, ScanPayModel::REQUEST_URL);
@@ -36,23 +36,6 @@ final class ScanPayService
         }
 
         return '返回值验签失败';
-    }
-
-    /**
-     * 生成签名
-     *  发送数据时的签名
-     *
-     * @param $request
-     * @param $privateKey
-     * @return string
-     * @throws \Exception
-     */
-    public function buildSign($request, $privateKey): string
-    {
-        $res = openssl_get_privatekey($privateKey);
-        openssl_sign($request, $signature, $res, OPENSSL_ALGO_SHA1);
-
-        return bin2hex($signature);
     }
 
     /**

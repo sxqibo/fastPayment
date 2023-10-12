@@ -30,7 +30,7 @@ final class QueryOrderScanPayService
         $signData = $scanPayQueryModel->getSignData();
 
         $request= $scanPayQueryModel->getData();
-        $request['signMsg'] = $this->buildSign($signData, $scanPayQueryModel->privateKey);
+        $request['signMsg'] = RsaUtil::buildSignForBin2Hex($signData, $scanPayQueryModel->privateKey);
 
         // post请求接口
         $content = HttpUtil::post($request, ScanPayQueryModel::REQUEST_URL);
@@ -82,21 +82,5 @@ final class QueryOrderScanPayService
         }
 
         return $queryDetailsArray;
-    }
-
-    /**
-     * 生成签名
-     *  发送数据时的签名
-     *
-     * @param $request
-     * @param $privateKey
-     * @return string
-     */
-    public function buildSign($request, $privateKey): string
-    {
-        $res = openssl_get_privatekey($privateKey);
-        openssl_sign($request, $signature, $res, OPENSSL_ALGO_SHA1);
-
-        return bin2hex($signature);
     }
 }
