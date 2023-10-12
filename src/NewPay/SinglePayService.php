@@ -26,36 +26,18 @@ final class SinglePayService
 
         // 付款公私钥/商户私钥（付款）.pem
         // 计算签名
-//        $request['signValue'] = $this->buildSign($singlePayModel->getSignData(), $singlePayModel->privateKey);
         $request['signValue'] = RsaUtil::buildSignForBase64($singlePayModel->getSignData(), $singlePayModel->privateKey);
 
         $content = HttpUtil::post($request, SinglePayModel::REQUEST_URL);
 
-        $bool = $this->verifySign(json_decode($content, true), $singlePayModel->publicKey);
+        $content = json_decode($content, true);
+        $bool = RsaUtil::verifySignForBase64($content['signValue'], $singlePayModel->publicKey, $signParam = Util::getStringData(SinglePayModel::VERIFY_FIELD, $content));
 
         if ($bool) {
             return $content;
         }
 
         return '返回值验签失败';
-    }
-
-    /**
-     * 对返回值验签
-     *
-     * @param $data
-     * @param $publicKey
-     * @return bool
-     * @throws Exception
-     */
-    public function verifySign($data, $publicKey): bool
-    {
-        // 生成验签字符串
-        $signParam = Util::getStringData(SinglePayModel::VERIFY_FIELD, $data);
-
-        // 验签
-        $res = openssl_get_publickey($publicKey);
-        return (bool)openssl_verify($signParam, base64_decode($data['signValue']), $res);
     }
 
     /**

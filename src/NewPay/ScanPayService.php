@@ -29,30 +29,16 @@ final class ScanPayService
         // post请求接口
         $content = HttpUtil::post($request, ScanPayModel::REQUEST_URL);
 
+        $content = json_decode($content, true);
         // 对返回值的验签
-        $bool = $this->verifySign(json_decode($content, true), $scanPayModel->publicKey);
+        $bool = RsaUtil::verifySignForHex2Bin($content['signMsg'],
+            $scanPayModel->publicKey,
+            Util::getStringData(ScanPayModel::VERIFY_FIELD, $content));
+
         if ($bool) {
             return $content;
         }
 
         return '返回值验签失败';
-    }
-
-    /**
-     * 接受返回数据的验签
-     *
-     * @param $data
-     * @param $publicKey
-     * @return bool
-     * @throws \Exception
-     */
-    public function verifySign($data, $publicKey): bool
-    {
-        // 生成验签字符串
-        $signParam = Util::getStringData(ScanPayModel::VERIFY_FIELD, $data);
-
-        // 验签
-        $res = openssl_get_publickey($publicKey);
-        return (bool)openssl_verify($signParam, hex2bin($data['signMsg']), $res);
     }
 }
