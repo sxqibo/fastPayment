@@ -15,6 +15,9 @@ use InvalidArgumentException;
 class BaseService
 {
     protected $base    = 'https://api.mch.weixin.qq.com/v3';
+
+    protected $client;
+
     protected $headers = [
         'Content-Type' => 'application/json',
         'Accept'       => 'application/json'
