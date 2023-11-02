@@ -12,6 +12,7 @@
 namespace Sxqibo\FastPayment\WeChatPay;
 
 use Exception;
+use Sxqibo\FastPayment\Common\Client;
 
 
 /**
@@ -237,11 +238,18 @@ class Complaints extends BaseService
             'url'    => $this->base . "/merchant-service/images/{$mediaId}",
             'method' => 'GET',
         ];
-        
+
         $result = $this->client->requestApi($endPoint, [], [], $this->headers, true);
 
         return $this->handleResult($result);
     }
 
-
+/**
+     * 卸载连接实例
+     * @return void
+     */
+    public function clear()
+    {
+        Client::$clientInstance = null;
+    }
 }
