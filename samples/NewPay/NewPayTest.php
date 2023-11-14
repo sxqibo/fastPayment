@@ -20,7 +20,7 @@ class NewPayTest
      *
      * @return void
      */
-    public function testScanPay($merId, $orderId, $weChatMchId)
+    public function testScanPay($merId, $orderId, $weChatMchId, $amount)
     {
         $scanPayService = new ScanPayService();
         $merOrderNum = $orderId;
@@ -31,7 +31,7 @@ class NewPayTest
             // 订单ID
             'merOrderNum' => $merOrderNum,
             // 支付金额（单位：分）
-            'tranAmt' => 1,
+            'tranAmt' => $amount,
             // 支付方式（微信：ORGCODE_WECHATPAY 阿里：ORGCODE_ALIPAY）
             'orgCode' => ScanPayModel::ORGCODE_WECHATPAY,
             // 进件号
@@ -213,7 +213,8 @@ function test1()
     $orderId = substr(md5(rand()), 20);
     $newPayTest = new NewPayTest();
     $weChatMchId = '';
-    $newPayTest->testScanPay($merId, $orderId, $weChatMchId);
+    $amount = 2;
+    $newPayTest->testScanPay($merId, $orderId, $weChatMchId, $amount);
 
     print PHP_EOL . '----------' . PHP_EOL;
     $newPayTest->scanPayQuery($merId, $orderId);
@@ -249,7 +250,7 @@ function test2()
  */
 function test3()
 {
-    $merId = '11000008298';
+    $merId = '';
     $orderId = substr(md5(rand()), 20);
     echo '............' . $orderId;
     $orgMerOrderId = '2c72dfeb1fd0';
