@@ -38,8 +38,9 @@ class NewPayTest
             'weChatMchId' => $weChatMchId,
         ];
 
-        $privateKey = 'MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAIba/jcGy1o1M5eg+8WSq8lMiBNgBpxCpAeI9B60Sli4KJjDRDNIUrJ2AjDtOJYubUeccVvGU7xYMeXi5YiGDvOVUSFq/344b6/RrRhjjVnBWDIckXb1BPl4Pq7v7q+5RSExEc3lWEyIuNc7gXQBh0UFs5W14dOZmX2V5577h2RtAgMBAAECgYBMJBvC3/AzN7SwmTFupVifKLnwDpjM44ePxZDoQS11GE27qwy30871elHUZCw+B2qmMzuB8OHYhwdtYAXvZpnLrw+5R+L0PYjGtGWQTmk7Cu4325FQ0Ppo84jG/oL40oZ72pTkq33Wa2neAww+sgasbMY1oAmabesN3RCZzjMsoQJBAPLix445YXZ1sRub3tXFAGK3nbu2SJEtfcG1W+oKaUFn9WCjaoyU8P5uoK5bNYm35Su9h2LSY7gA5arZV8gdeDUCQQCOIv5wYeDXY4Te7N0uGtx4rhQrN4nj4pg5Vjb5V497Kzbq7iXMYRN0wgsDxRBJPXME4psOVO3ADzeUSFL03XJZAkAVsvr/EtNJQQR8ofVLhdkd+KeH4KYlCjpk9u3qP9nddQswAgl/28KYCIwkZ5Ol5R79RGZ3BrLP+oyKMfassy1NAkA4Z2ye/khyUNzOdiKDhEdPYI1CZSTEGQydXDgulG+sygZeDilTxIYrBEHIui/vUIJPQvmTI2LBn4hHwLei0inpAkEA21DAmRGy7LcERtXC7g93wzjUAuHbRF00WfOD1ZlQMqFWMEJZKZBbvxkGatq2saQiYZ6lC+Ig7onmCYT6ZZwl6w==';
-        $publicKey = 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCf21zJo95Uf9KKPLxagqzaT+L0fvsKuLG5cW5rzzHKwgfe8TkU2/ZnI2T0DowRvz7w98kfKBKxu0q/VV8QV21Ui/AxOXdfrbQEQ/QVSXtF8NtCpaXqcSOdNQF9dDNpx/VrDpaarv6xp/4nfbeAlf+t6IdUkfo8Rz0Ne5fihpsSRwIDAQAB';
+        // 收款公私钥
+        $privateKey = '';
+        $publicKey = '';
 
         $scanPayModel = new ScanPayModel();
         $scanPayModel->setPrivateKey($privateKey);
@@ -80,8 +81,8 @@ class NewPayTest
         $scanPayQueryModel = new ScanPayQueryModel();
         $scanPayQueryModel->copy($data);
 
-        // 收款公私钥/商户私钥（收款）.pem
-        $privateKey = 'MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAIba/jcGy1o1M5eg+8WSq8lMiBNgBpxCpAeI9B60Sli4KJjDRDNIUrJ2AjDtOJYubUeccVvGU7xYMeXi5YiGDvOVUSFq/344b6/RrRhjjVnBWDIckXb1BPl4Pq7v7q+5RSExEc3lWEyIuNc7gXQBh0UFs5W14dOZmX2V5577h2RtAgMBAAECgYBMJBvC3/AzN7SwmTFupVifKLnwDpjM44ePxZDoQS11GE27qwy30871elHUZCw+B2qmMzuB8OHYhwdtYAXvZpnLrw+5R+L0PYjGtGWQTmk7Cu4325FQ0Ppo84jG/oL40oZ72pTkq33Wa2neAww+sgasbMY1oAmabesN3RCZzjMsoQJBAPLix445YXZ1sRub3tXFAGK3nbu2SJEtfcG1W+oKaUFn9WCjaoyU8P5uoK5bNYm35Su9h2LSY7gA5arZV8gdeDUCQQCOIv5wYeDXY4Te7N0uGtx4rhQrN4nj4pg5Vjb5V497Kzbq7iXMYRN0wgsDxRBJPXME4psOVO3ADzeUSFL03XJZAkAVsvr/EtNJQQR8ofVLhdkd+KeH4KYlCjpk9u3qP9nddQswAgl/28KYCIwkZ5Ol5R79RGZ3BrLP+oyKMfassy1NAkA4Z2ye/khyUNzOdiKDhEdPYI1CZSTEGQydXDgulG+sygZeDilTxIYrBEHIui/vUIJPQvmTI2LBn4hHwLei0inpAkEA21DAmRGy7LcERtXC7g93wzjUAuHbRF00WfOD1ZlQMqFWMEJZKZBbvxkGatq2saQiYZ6lC+Ig7onmCYT6ZZwl6w==';
+        // 收款私钥
+        $privateKey = '';
         $scanPayQueryModel->setPrivateKey($privateKey);
 
         $queryOrderScanPayService = new QueryOrderScanPayService();
