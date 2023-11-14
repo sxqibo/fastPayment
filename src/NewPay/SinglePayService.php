@@ -31,7 +31,7 @@ final class SinglePayService
         $content = HttpUtil::post($request, SinglePayModel::REQUEST_URL);
 
         $content = json_decode($content, true);
-        $bool = RsaUtil::verifySignForBase64($content['signValue'], $singlePayModel->publicKey, $signParam = Util::getStringData(SinglePayModel::VERIFY_FIELD, $content));
+        $bool = RsaUtil::verifySignForBase64($content['signValue'], $singlePayModel->publicKey, Util::getStringData(SinglePayModel::VERIFY_FIELD, $content));
 
         if ($bool) {
             return $content;
