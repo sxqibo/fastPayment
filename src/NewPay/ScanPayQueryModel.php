@@ -130,7 +130,7 @@ final class ScanPayQueryModel
         foreach (self::SIGN_FIELD as $field) {
             $fields[$field] = $this->$field;
         }
-        var_dump($fields);
+        // var_dump($fields);
         return http_build_query($fields);
     }
 
