@@ -2,9 +2,14 @@
 
 namespace Sxqibo\FastPayment\NewPay;
 
-use ReflectionClass;
+use Exception;
 
-final class ScanPayModel
+/**
+ * 微信&支付宝扫码（C扫B）
+ * 新生支付文档 5.2
+ * 文档地址：https://www.yuque.com/chenyanfei-sjuaz/uhng8q/uoce7b#wZTrE
+ */
+final class ScanPayModel extends BaseModel
 {
     const REQUEST_URL = 'https://gateway.hnapay.com/website/scanPay.do';
 
@@ -26,13 +31,6 @@ final class ScanPayModel
     const ORGCODE_TENPAY = 'TENPAY';
     /** @var string 银联二维码 */
     const ORGCODE_UNIONPAY = 'UNIONPAY';
-
-    /** @var int 编码方式 */
-    const CHARSET = 1;
-
-    /** @var int 签名类型 */
-    /** @var int RSA */
-    const SIGNTYPE_RSA = 1;
 
     /** @var string[] 签名字段 */
     const SIGN_FIELD =  ['tranCode', 'version',
@@ -69,10 +67,12 @@ final class ScanPayModel
     private $signType;
     private $signMsg;
 
-    private $publicKey;
-    private $privateKey;
+    private $config = [
+        'tranIP' => '114.114.114.114',
+        'notifyUrl' => 'http://xxx.xxx.com/xxx'
+    ];
 
-    public function __construct()
+    public function __construct($config = [])
     {
         $this->version = self::VERSION;
         $this->tranCode = self::TRANCODE;
@@ -82,30 +82,8 @@ final class ScanPayModel
         $this->tranIP = '114.114.114.114';
         // 此处从配置读
         $this->notifyUrl = 'http://xxx.xxx.com/xxx';
-        $this->charset = self::CHARSET;
+        $this->charset = self::CHARSET_UTF8;
         $this->signType = self::SIGNTYPE_RSA;
-    }
-
-    public function setPublicKey(string $publicKey)
-    {
-        // 收款公私钥/网关公钥（收款）.pem
-        $this->publicKey = KeyUtils::makePublicKey($publicKey);
-    }
-
-    public function setPrivateKey(string $privateKey)
-    {
-        // 收款公私钥/商户私钥（收款）.pem
-        $this->privateKey = KeyUtils::makePrivateKey($privateKey);
-    }
-
-    public function __get($name)
-    {
-        return $this->$name;
-    }
-
-    public function __set($name, $value)
-    {
-        $this->$name = $value;
     }
 
     /**
@@ -119,24 +97,20 @@ final class ScanPayModel
         foreach ($data as $key => $value) {
             $this->$key = $value;
         }
+
+        $err = $this->verify();
+
+        if (!empty($err)) {
+            throw new Exception($err);
+        }
+
+        $this->signMsg = RsaUtil::buildSignForBin2Hex($this->getSignData(), $this->privateKey);
     }
 
-    /**
-     * 属性转数组
-     *
-     * @return array
-     */
-    public function getData(): array
+    public function getModelData(): array
     {
-        $data = [];
-
-        $reflectionClass = new ReflectionClass(__CLASS__);
-        $reflectionProperties = $reflectionClass->getProperties();
-
-        foreach ($reflectionProperties as $property) {
-            $propertyName = $property->getName();
-            $data[$propertyName] = $this->$propertyName;
-        }
+        $data = parent::getData(__CLASS__, $this);
+        unset($data['config']);
 
         return $data;
     }
@@ -185,6 +159,14 @@ final class ScanPayModel
 
     public function getSignData(): string
     {
-        return Util::getStringData(self::SIGN_FIELD, $this->getData());
+        return Util::getStringData(self::SIGN_FIELD, $this->getModelData());
+    }
+
+    public function verifySign($responseData): bool
+    {
+        // 对返回值的验签
+        return RsaUtil::verifySignForHex2Bin($responseData['signMsg'],
+            $this->publicKey,
+            Util::getStringData(self::VERIFY_FIELD, $responseData));
     }
 }

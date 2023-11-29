@@ -52,6 +52,9 @@ abstract class BaseModel
             $data[$propertyName] = $property->getValue($obj);
         }
 
+        unset($data['privateKey']);
+        unset($data['publicKey']);
+
         return $data;
     }
 }
