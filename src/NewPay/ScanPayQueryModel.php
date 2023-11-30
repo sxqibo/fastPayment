@@ -2,12 +2,15 @@
 
 namespace Sxqibo\FastPayment\NewPay;
 
+use Exception;
 use ReflectionClass;
 
 /**
+ * 查询接口-扫码API
  *
+ * https://www.yuque.com/chenyanfei-sjuaz/uhng8q/nghr8z
  */
-final class ScanPayQueryModel
+final class ScanPayQueryModel extends BaseModel
 {
     const REQUEST_URL = 'https://gateway.hnapay.com/website/queryOrderResult.htm';
 
@@ -25,14 +28,6 @@ final class ScanPayQueryModel
     const TYPE_PAY = '1';
     /** @var string 退款订单 */
     const TYPE_REFUND = '2';
-
-    /** @var string 编码方式 */
-    /** @var string UTF-8 */
-    const CHARSET = '1';
-
-    /** @var string 签名类型 */
-    /** @var string RSA */
-    const SIGNTYPE_RSA = '1';
 
     /** @var string[] queryDetail的字段 */
     private $queryDetail = [
@@ -61,28 +56,12 @@ final class ScanPayQueryModel
     private $signType = '';
     private $signMsg = '';
 
-    private $privateKey;
 
     public function __construct()
     {
         $this->version = self::VERSION;
-        $this->charset = self::CHARSET;
+        $this->charset = self::CHARSET_UTF8;
         $this->signType = self::SIGNTYPE_RSA;
-    }
-
-    public function setPrivateKey(string $privateKey)
-    {
-        $this->privateKey = KeyUtils::makePrivateKey($privateKey);
-    }
-
-    public function __get($name)
-    {
-        return $this->$name;
-    }
-
-    public function __set($name, $value)
-    {
-        $this->$name = $value;
     }
 
     /**
@@ -96,26 +75,18 @@ final class ScanPayQueryModel
         foreach ($data as $key => $value) {
             $this->$key = $value;
         }
-    }
 
-    /**
-     * 属性转数组
-     *
-     * @return array
-     */
-    public function getData(): array
-    {
-        $data = [];
-
-        $reflectionClass = new ReflectionClass(__CLASS__);
-        $reflectionProperties = $reflectionClass->getProperties();
-
-        foreach ($reflectionProperties as $property) {
-            $propertyName = $property->getName();
-            $data[$propertyName] = $this->$propertyName;
+        $err = $this->verify();
+        if (!empty($err)) {
+            throw new Exception($err);
         }
 
-        return $data;
+        $this->signMsg = RsaUtil::buildSignForBin2Hex($this->getSignData(), $this->privateKey);
+    }
+
+    public function getModelData(): array
+    {
+        return parent::getData(__CLASS__, $this);
     }
 
     /**
@@ -171,5 +142,56 @@ final class ScanPayQueryModel
         }
 
         return '';
+    }
+
+    public function getDetail($responseData)
+    {
+        // 内容转数组，此处返回的不是json串
+        parse_str($responseData, $arr);
+
+        if ($arr['resultCode'] != '0000') {
+            throw new Exception((new NewPayCode())->getResultCode($arr['resultCode']));
+        }
+
+        if ($arr['queryDetailsSize'] == 0) {
+            throw new Exception('无查询结果');
+        }
+
+        if ($arr['queryDetailsSize'] == -1) {
+            throw new Exception('查询出现异常');
+        }
+
+        // 获取详情
+        $detail = $arr['queryDetails'];
+        $queryDetail = $this->getQueryDetail($detail);
+
+        $arr['queryDetailsArr'] = $queryDetail;
+
+        return $arr;
+    }
+
+    /**
+     * 把查询详情字符串转换为数组
+     *
+     * @param $queryDetails
+     * @return array
+     */
+    public function getQueryDetail($queryDetails): array
+    {
+        $queryDetailsArr = explode('|', $queryDetails);
+
+        $queryDetailsArray = [];
+        foreach ($queryDetailsArr as $queryDetail) {
+            $queryDetailArr = [];
+            $query = explode(',', $queryDetail);
+            $cnt = 0;
+            foreach ($this->queryDetail as $detail) {
+                $queryDetailArr[$detail] = $query[$cnt];
+                $cnt ++;
+            }
+            $queryDetailsArray[] = $queryDetailArr;
+        }
+
+        return $queryDetailsArray;
     }
 }
