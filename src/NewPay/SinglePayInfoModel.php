@@ -2,9 +2,12 @@
 
 namespace Sxqibo\FastPayment\NewPay;
 
-use ReflectionClass;
-
-final class SinglePayInfoModel
+/**
+ * 5.4 付款到银行
+ *
+ * 文档地址：https://www.yuque.com/chenyanfei-sjuaz/uhng8q/ccdtg7
+ */
+final class SinglePayInfoModel extends BaseModel
 {
     /** @var string 付款类型 */
     /** @var string 付款到银行 */
@@ -45,21 +48,21 @@ final class SinglePayInfoModel
     private $paymentTerminalInfo = '';
     private $deviceInfo = '';
 
-    public function __construct()
-    {
-        $this->notifyUrl = 'http://xxx.xxx.com/xxx';
-        $this->paymentTerminalInfo = '01|10001';
-        $this->deviceInfo = '192.168.0.1||||||';
-    }
+    private $config = [
+        'notifyUrl' => 'http://xxx.xxx.com/xxx',
+        'paymentTerminalInfo' => '01|10001',
+        'deviceInfo' => '192.168.0.1||||||',
+    ];
 
-    public function __get($name)
+    public function __construct(array $config = [])
     {
-        return $this->$name;
-    }
+        if (!empty($config)) {
+            $this->config = $config;
+        }
 
-    public function __set($name, $value)
-    {
-        $this->$name = $value;
+        $this->notifyUrl = $this->config['notifyUrl'];
+        $this->paymentTerminalInfo = $this->config['paymentTerminalInfo'];
+        $this->deviceInfo = $this->config['deviceInfo'];
     }
 
     /**
@@ -75,24 +78,43 @@ final class SinglePayInfoModel
         }
     }
 
-    /**
-     * 属性转数组
-     *
-     * @return array
-     */
-    public function getData()
+    public function getMsgCipherText($publicKey)
     {
-        $data = [];
+        $msgText = $this->getModelData();
 
-        $reflectionClass = new ReflectionClass(__CLASS__);
-        $reflectionProperties = $reflectionClass->getProperties();
+        // 付款公司钥/网关公钥(付款).pem
+        $msgCiphertext = json_encode($msgText, JSON_UNESCAPED_UNICODE);
 
-        foreach ($reflectionProperties as $property) {
-            $propertyName = $property->getName();
-            $data[$propertyName] = $this->$propertyName;
+        return $this->publicEncrypt($msgCiphertext, $publicKey);
+    }
+
+    /**
+     * 付款detail的加密
+     *
+     * @param $input
+     * @param $pk
+     * @return false|string
+     */
+    public function publicEncrypt($input, $pk)
+    {
+        $split = str_split($input, 117);
+
+        $crypto = '';
+
+        foreach ($split as $chunk) {
+            $isOkey = openssl_public_encrypt($chunk, $output, $pk, OPENSSL_PKCS1_PADDING);
+            if (!$isOkey) {
+                return false;
+            }
+            $crypto .= $output;
         }
 
-        return $data;
+        return base64_encode($crypto);
+    }
+
+    public function getModelData(): array
+    {
+        return parent::getData(__CLASS__, $this);
     }
 
     public function verify()

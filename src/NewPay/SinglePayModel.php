@@ -2,9 +2,12 @@
 
 namespace Sxqibo\FastPayment\NewPay;
 
-use ReflectionClass;
-
-final class SinglePayModel
+/**
+ * 5.4 付款到银行
+ *
+ * 文档地址：https://www.yuque.com/chenyanfei-sjuaz/uhng8q/ccdtg7
+ */
+final class SinglePayModel extends BaseModel
 {
     const REQUEST_URL = 'https://gateway.hnapay.com/website/singlePay.do';
 
@@ -13,14 +16,6 @@ final class SinglePayModel
 
     /** @var string 交易代码  */
     const TRANCODE = 'SGP01';
-
-    /** @var string 编码方式 */
-    /** @var string UTF-8 */
-    const CHARSET = '1';
-
-    /** @var string 签名类型 */
-    /** @var string RSA */
-    const SIGNTYPE_RSA = '1';
 
     /** @var string[] 签名字段 */
     const SIGN_FIELD =  ['version', 'tranCode',
@@ -50,9 +45,6 @@ final class SinglePayModel
     private $merAttach = '';
     private $charset = '';
 
-    private $privateKey;
-    private $publicKey;
-
     private $singlePayInfoMdoel;
 
     public function __construct()
@@ -60,32 +52,10 @@ final class SinglePayModel
         $this->version = self::VERSION;
         $this->tranCode = self::TRANCODE;
         $this->signType = self::SIGNTYPE_RSA;
-        $this->charset = self::CHARSET;
+        $this->charset = self::CHARSET_UTF8;
         $this->submitTime = date('YmdHis', time());
 
         $this->singlePayInfoMdoel = new SinglePayInfoModel();
-    }
-
-    public function setPublicKey(string $publicKey)
-    {
-        // 付款公司钥/网关公钥(付款).pem
-        $this->publicKey = KeyUtils::makePublicKey($publicKey);
-    }
-
-    public function setPrivateKey(string $privateKey)
-    {
-        // 付款公私钥/商户私钥（付款）.pem
-        $this->privateKey = KeyUtils::makePrivateKey($privateKey);
-    }
-
-    public function __get($name)
-    {
-        return $this->$name;
-    }
-
-    public function __set($name, $value)
-    {
-        $this->$name = $value;
     }
 
     /**
@@ -93,6 +63,7 @@ final class SinglePayModel
      *
      * @param $data
      * @return void
+     * @throws \Exception
      */
     public function copy($data)
     {
@@ -103,31 +74,29 @@ final class SinglePayModel
         unset($data['merOrderId']);
 
         $this->singlePayInfoMdoel->copy($data);
+
+        $this->msgCiphertext = $this->singlePayInfoMdoel->getMsgCipherText($this->publicKey);
+
+        // 付款公私钥/商户私钥（付款）.pem
+        // 计算签名
+        $this->signValue = RsaUtil::buildSignForBase64(
+            $this->getSignData(), $this->privateKey);
     }
 
-    public function getData(): array
+
+    public function getModelData(): array
     {
-        $data = [];
-
-        $reflectionClass = new ReflectionClass(__CLASS__);
-        $reflectionProperties = $reflectionClass->getProperties();
-
-        foreach ($reflectionProperties as $property) {
-            $propertyName = $property->getName();
-            $data[$propertyName] = $this->$propertyName;
-        }
-
-        return $data;
+        return parent::getData(__CLASS__, $this);
     }
 
     public function getPayInfo(): array
     {
-        return $this->singlePayInfoMdoel->getData();
+        return $this->singlePayInfoMdoel->getModelData();
     }
 
     public function getSignData(): string
     {
-        return Util::getStringData(self::SIGN_FIELD, $this->getData());
+        return Util::getStringData(self::SIGN_FIELD, $this->getModelData());
     }
 
     public function verify()
@@ -140,5 +109,12 @@ final class SinglePayModel
         }
 
         return $this->singlePayInfoMdoel->verify();
+    }
+
+    public function verifySign($responseData): bool
+    {
+        return RsaUtil::verifySignForBase64($responseData['signValue'],
+            $this->publicKey,
+            Util::getStringData(self::VERIFY_FIELD, $responseData));
     }
 }
