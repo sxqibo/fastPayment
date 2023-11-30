@@ -2,9 +2,14 @@
 
 namespace Sxqibo\FastPayment\NewPay;
 
-use ReflectionClass;
+use Exception;
 
-final class SinglePayQueryModel
+/**
+ * 5.7 查询接口-代付
+ *
+ * https://www.yuque.com/chenyanfei-sjuaz/uhng8q/bfcc86
+ */
+final class SinglePayQueryModel extends BaseModel
 {
     const REQUEST_URL = 'https://gateway.hnapay.com/website/singlePayQuery.do';
 
@@ -13,14 +18,6 @@ final class SinglePayQueryModel
 
     /** @var string 交易代码 */
     const TRANCODE = 'SGP02';
-
-    /** @var string 签名类型 */
-    /** @var string RSA */
-    const SIGNTYPE_RSA = '1';
-
-    /** @var string 编码方式 */
-    /** @var string UTF-8 */
-    const CHARSET = '1';
 
     private $version = '';
     private $tranCode = '';
@@ -49,37 +46,12 @@ final class SinglePayQueryModel
         ['submitTime', '原商户订单请求时间 不能为空'],
     ];
 
-    private $privateKey;
-    private $publicKey;
-
     public function __construct()
     {
         $this->version = self::VERSION;
         $this->tranCode = self::TRANCODE;
         $this->signType = self::SIGNTYPE_RSA;
-        $this->charset = self::CHARSET;
-    }
-
-    public function setPublicKey(string $publicKey)
-    {
-        // 付款公司钥/网关公钥(付款).pem
-        $this->publicKey = KeyUtils::makePublicKey($publicKey);
-    }
-
-    public function setPrivateKey(string $privateKey)
-    {
-        // 付款公私钥/商户私钥（付款）.pem
-        $this->privateKey = KeyUtils::makePrivateKey($privateKey);
-    }
-
-    public function __get($name)
-    {
-        return $this->$name;
-    }
-
-    public function __set($name, $value)
-    {
-        $this->$name = $value;
+        $this->charset = self::CHARSET_UTF8;
     }
 
     /**
@@ -93,26 +65,26 @@ final class SinglePayQueryModel
         foreach ($data as $key => $value) {
             $this->$key = $value;
         }
+
+        $err = $this->verify();
+        if (!empty($err)) {
+            throw new Exception($err);
+        }
+
+        $this->signValue = RsaUtil::buildSignForBase64($this->getSignData(), $this->privateKey);
+    }
+
+    public function getModelData(): array
+    {
+        return parent::getData(__CLASS__, $this);
     }
 
     /**
-     * 属性转数组
-     *
-     * @return array
+     * @throws Exception
      */
-    public function getData(): array
+    public function getSignData(): string
     {
-        $data = [];
-
-        $reflectionClass = new ReflectionClass(__CLASS__);
-        $reflectionProperties = $reflectionClass->getProperties();
-
-        foreach ($reflectionProperties as $property) {
-            $propertyName = $property->getName();
-            $data[$propertyName] = $this->$propertyName;
-        }
-
-        return $data;
+        return Util::getStringData(self::SIGN_FIELD, $this->getModelData());
     }
 
     public function verify(): string
@@ -125,5 +97,13 @@ final class SinglePayQueryModel
         }
 
         return '';
+    }
+
+    public function verifySign($responseData): bool
+    {
+        return RsaUtil::verifySignForBase64(
+            $responseData['signValue'],
+            $this->publicKey,
+            Util::getStringData(self::VERIFY_FIELD, $responseData));
     }
 }
