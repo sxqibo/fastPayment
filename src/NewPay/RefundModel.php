@@ -2,9 +2,12 @@
 
 namespace Sxqibo\FastPayment\NewPay;
 
-use ReflectionClass;
-
-final class RefundModel
+/**
+ * 5.8 退款接口
+ *
+ * https://www.yuque.com/chenyanfei-sjuaz/uhng8q/stxmz7
+ */
+final class RefundModel extends BaseModel
 {
     const REQUEST_URL = 'https://gateway.hnapay.com/exp/refund.do';
 
@@ -13,14 +16,6 @@ final class RefundModel
 
     /** @var string 交易代码 */
     const TRANCODE = 'EXP09';
-
-    /** @var string 签名类型 */
-    /** @var string RSA */
-    const SIGNTYPE_RSA = '1';
-
-    /** @var string 编码方式 */
-    /** @var string UTF-8 */
-    const CHARSET = '1';
 
     const IS_NOT_FIELD = [
         ['merId', '商户ID 不能为空'],
@@ -37,7 +32,7 @@ final class RefundModel
         'merOrderId', 'merId',
         'charset', 'signType',
         'resultCode', 'errorCode', 'hnapayOrderId',
-        'orgMerOrderId', 'refundAmt', 'orderStatus'];
+        'orgMerOrderId', 'tranAmt', 'refundAmt', 'orderStatus'];
 
     private $version;
     private $tranCode;
@@ -52,39 +47,16 @@ final class RefundModel
 
     private $refundInfoModel;
 
-    private $publicKey;
-    private $privateKey;
-
     public function __construct()
     {
         $this->version = self::VERSION;
         $this->tranCode = self::TRANCODE;
         $this->signType = self::SIGNTYPE_RSA;
-        $this->charset = self::CHARSET;
+        $this->charset = self::CHARSET_UTF8;
         $this->submitTime = date('YmdHis', time());
         $this->merAttach = '';
 
         $this->refundInfoModel = new RefundInfoModel();
-    }
-
-    public function setPublicKey(string $publicKey)
-    {
-        $this->publicKey = KeyUtils::makePublicKey($publicKey);
-    }
-
-    public function setPrivateKey(string $privateKey)
-    {
-        $this->privateKey = KeyUtils::makePrivateKey($privateKey);
-    }
-
-    public function __get($name)
-    {
-        return $this->$name;
-    }
-
-    public function __set($name, $value)
-    {
-        $this->$name = $value;
     }
 
     /**
@@ -102,36 +74,26 @@ final class RefundModel
         unset($data['merOrderId']);
 
         $this->refundInfoModel->copy($data);
+
+        $this->msgCiphertext = $this->refundInfoModel->getMsgCipherText($this->publicKey);
+
+        $this->signValue = RsaUtil::buildSignForBase64(
+            $this->getSignData(), $this->privateKey);
     }
 
-    /**
-     * 属性转数组
-     *
-     * @return array
-     */
-    public function getData(): array
+//    public function getRefundInfo()
+//    {
+//        return $this->refundInfoModel->getModelData();
+//    }
+
+    public function getModelData(): array
     {
-        $data = [];
-
-        $reflectionClass = new ReflectionClass(__CLASS__);
-        $reflectionProperties = $reflectionClass->getProperties();
-
-        foreach ($reflectionProperties as $property) {
-            $propertyName = $property->getName();
-            $data[$propertyName] = $this->$propertyName;
-        }
-
-        return $data;
-    }
-
-    public function getRefundInfo()
-    {
-        return $this->refundInfoModel->getData();
+        return parent::getData(__CLASS__, $this);
     }
 
     public function getSignData()
     {
-        return Util::getStringData(self::SIGN_FIELD, $this->getData());
+        return Util::getStringData(self::SIGN_FIELD, $this->getModelData());
     }
 
     public function verify()
@@ -144,5 +106,11 @@ final class RefundModel
         }
 
         return $this->singlePayInfoMdoel->verify();
+    }
+
+    public function verifySign($responseData)
+    {
+        return RsaUtil::verifySignForBase64($responseData['signValue'], $this->publicKey,
+            Util::getStringData(self::VERIFY_FIELD, $responseData));
     }
 }

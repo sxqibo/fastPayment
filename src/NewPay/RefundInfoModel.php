@@ -2,9 +2,12 @@
 
 namespace Sxqibo\FastPayment\NewPay;
 
-use ReflectionClass;
-
-final class RefundInfoModel
+/**
+ * 5.8 退款接口
+ *
+ * https://www.yuque.com/chenyanfei-sjuaz/uhng8q/stxmz7
+ */
+final class RefundInfoModel extends BaseModel
 {
     const IS_NOT_FIELD = [
         ['orgMerOrderId', '原商户支付订单号 不能为空'],
@@ -25,14 +28,9 @@ final class RefundInfoModel
         $this->notifyUrl = 'http://xxx.xxx.com/xxx';
     }
 
-    public function __get($name)
+    public function getModelData(): array
     {
-        return $this->$name;
-    }
-
-    public function __set($name, $value)
-    {
-        return $this->$name = $value;
+        return parent::getData(__CLASS__, $this);
     }
 
     /**
@@ -48,26 +46,6 @@ final class RefundInfoModel
         }
     }
 
-    /**
-     * 属性转数组
-     *
-     * @return array
-     */
-    public function getData()
-    {
-        $data = [];
-
-        $reflectionClass = new ReflectionClass(__CLASS__);
-        $reflectionProperties = $reflectionClass->getProperties();
-
-        foreach ($reflectionProperties as $property) {
-            $propertyName = $property->getName();
-            $data[$propertyName] = $this->$propertyName;
-        }
-
-        return $data;
-    }
-
     public function verify()
     {
         foreach (self::IS_NOT_FIELD as $field) {
@@ -78,5 +56,31 @@ final class RefundInfoModel
         }
 
         return '';
+    }
+
+    public function getMsgCipherText($publicKey)
+    {
+        $msgText = $this->getModelData();
+
+        $msgCiphertext = json_encode($msgText, JSON_UNESCAPED_UNICODE);
+
+        return $this->publicEncrypt($msgCiphertext, $publicKey);
+    }
+
+    private function publicEncrypt($input, $pk)
+    {
+        $split = str_split($input, 117);
+
+        $crypto = '';
+
+        foreach ($split as $chunk) {
+            $isOkey = openssl_public_encrypt($chunk, $output, $pk, OPENSSL_PKCS1_PADDING);
+            if (!$isOkey) {
+                return false;
+            }
+            $crypto .= $output;
+        }
+
+        return base64_encode($crypto);
     }
 }
