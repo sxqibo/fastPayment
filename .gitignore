@@ -2,3 +2,4 @@
 /autoload.php
 /vendor
 /certs
+.composer.lock

@@ -27,7 +27,9 @@
     "ext-json": "*",
     "ext-simplexml": "*",
     "ext-libxml": "*",
-    "overtrue/wechat": "^5.6"
+    "overtrue/wechat": "^5.6",
+    "yansongda/pay": "~3.5.0",
+    "hyperf/pimple": "~2.2.0"
   },
   "config": {
     "allow-plugins": {
