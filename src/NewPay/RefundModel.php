@@ -105,7 +105,7 @@ final class RefundModel extends BaseModel
             }
         }
 
-        return $this->singlePayInfoMdoel->verify();
+        return $this->refundInfoModel->verify();
     }
 
     public function verifySign($responseData)

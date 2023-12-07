@@ -28,7 +28,7 @@ final class SinglePayModel extends BaseModel
         'charset', 'signType',
         'resultCode', 'hnapayOrderId'];
 
-    /** @var \string[][] 判断不能为空的字段 */
+    /** @var string[][] 判断不能为空的字段 */
     const IS_NOT_FIELD = [
         ['merId', '商户ID 不能为空'],
         ['merOrderId', '商户订单号 不能为空']

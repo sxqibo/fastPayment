@@ -49,10 +49,10 @@ final class RsaUtil
      *  返回结果的验签
      *  付款到银行和付款到银行查询使用
      *
-     * @param $data
+     * @param $signValue
      * @param $publicKey
+     * @param $signParam
      * @return bool
-     * @throws Exception
      */
     public static function verifySignForBase64($signValue, $publicKey, $signParam): bool
     {
