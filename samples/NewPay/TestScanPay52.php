@@ -3,6 +3,8 @@
 use Sxqibo\FastPayment\NewPay\NewPayCode;
 use Sxqibo\FastPayment\NewPay\ScanPayModel;
 use Sxqibo\FastPayment\NewPay\ScanPayService;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 
 require_once '../../vendor/autoload.php';
 
@@ -12,10 +14,12 @@ require_once '../../vendor/autoload.php';
 class TestScanPay
 {
     private $config;
+    private $logger;
 
-    public function __construct()
+    public function __construct($logger)
     {
         $this->config = include 'config.php';
+        $this->logger = $logger;
     }
 
     public function getConfig()
@@ -46,23 +50,36 @@ class TestScanPay
         $scanPayModel->copy($data);
 
         $result = $scanPayService->scanPay($scanPayModel);
-        print '返回的数据:' . json_encode($result, JSON_UNESCAPED_UNICODE) . PHP_EOL;
+        $this->logger->info('返回的数据:' . json_encode($result, JSON_UNESCAPED_UNICODE));
+
 
         $newPayCode = new NewPayCode();
-        print $newPayCode->getResultCode($result['resultCode']) . PHP_EOL;
+        $this->logger->info('状态码：'. $newPayCode->getResultCode($result['resultCode']));
+
+        return $result;
     }
 }
 
-function test1()
-{
-    $test = new TestScanPay();
+/**
+ * 日志相关
+ */
+// 创建一个日志记录器对象
+$logger = new Logger('newPayLogger');
 
-    $merId       = $test->getConfig()['service_corp']['merch_id'];  // 服务商-商户ID
-    $orderId     = substr(md5(rand()), 20); // 订单号
-    print "我生成的订单号是：". $orderId;
-    $weChatMchId = $test->getConfig()['merchant_corp']['wechat_mch_id']; // 微信进件号
+// 创建一个日志处理器对象，将日志记录到日志文件中
+$handler = new StreamHandler('./logfile.log');
+$logger->pushHandler($handler);
 
-    $test->scanPay($merId, $orderId, $weChatMchId);
-}
+/**
+ * 支付相关
+ */
+$test = new TestScanPay($logger);
+$merId   = $test->getConfig()['service_corp']['merch_id'];  // 服务商-商户ID
+$orderId = substr(md5(rand()), 20); // 订单号
+$logger->info("我生成的订单号是：" . $orderId);
+$weChatMchId = $test->getConfig()['merchant_corp']['wechat_mch_id']; // 微信进件号
 
-test1();
+$test->scanPay($merId, $orderId, $weChatMchId);
+
+$logger->info("===以上为扫码支付 相关日志============");
+print "扫码支付，相关信息请查看日志！";

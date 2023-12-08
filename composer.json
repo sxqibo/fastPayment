@@ -35,5 +35,8 @@
     "allow-plugins": {
       "easywechat-composer/easywechat-composer": true
     }
+  },
+  "require-dev": {
+    "monolog/monolog": "^3.5"
   }
 }

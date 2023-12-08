@@ -2,16 +2,20 @@
 
 use Sxqibo\FastPayment\NewPay\SinglePayQueryModel;
 use Sxqibo\FastPayment\NewPay\SinglePayQueryService;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 
 require_once '../../vendor/autoload.php';
 
 class TestTransferQuery57
 {
     private $config;
+    private $logger;
 
-    public function __construct()
+    public function __construct($logger)
     {
         $this->config = include 'config.php';
+        $this->logger = $logger;
     }
 
     public function getConfig()
@@ -44,27 +48,41 @@ class TestTransferQuery57
         $result                = $singlePayQueryService->query($singlePayQueryModel);
 
         var_dump($result);
+        $this->logger->info("转账查询结果：". json_encode($result, 256));
     }
 }
 
-function test1()
-{
-    $test = new TestTransferQuery57();
-    // 服务商信息
-    $merId = $test->getConfig()['service_corp']['merch_id']; // 服务商-商户ID
+/**
+ * 日志相关
+ */
+// 创建一个日志记录器对象
+$logger = new Logger('newPayLogger');
 
-    // 用户信息
-    $payeeName    = $test->getConfig()['transfer_info']['user_name'];
-    $payeeAccount = $test->getConfig()['transfer_info']['user_card_number'];
+// 创建一个日志处理器对象，将日志记录到日志文件中
+$handler = new StreamHandler('./logfile.log');
+$logger->pushHandler($handler);
 
-    // 金额信息
-    $tranAmt      = $test->getConfig()['transfer_info']['transfer_amount'];
 
-    // 订单信息
-    $orderId    = $test->getConfig()['transfer_info']['order_id'];
-    $submitTime = $test->getConfig()['transfer_info']['submit_time'];
+/**
+ * 代付查询相关
+ */
+$test = new TestTransferQuery57($logger);
+// 服务商信息
+$merId = $test->getConfig()['service_corp']['merch_id']; // 服务商-商户ID
 
-    $test->singlePayQuery($merId, $orderId, $payeeName, $payeeAccount, $tranAmt, $submitTime);
-}
+// 用户信息
+$payeeName    = $test->getConfig()['transfer_info']['user_name'];
+$payeeAccount = $test->getConfig()['transfer_info']['user_card_number'];
 
-test1();
+// 金额信息
+$tranAmt      = $test->getConfig()['transfer_info']['transfer_amount'];
+
+// 订单信息
+$orderId    = $test->getConfig()['transfer_info']['order_id'];
+$submitTime = $test->getConfig()['transfer_info']['submit_time'];
+
+$test->singlePayQuery($merId, $orderId, $payeeName, $payeeAccount, $tranAmt, $submitTime);
+
+
+$logger->info("===以上为 代付查询 相关日志============");
+print "代付查询 相关信息请查看日志！";

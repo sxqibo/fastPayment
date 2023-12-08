@@ -3,6 +3,8 @@
 use Sxqibo\FastPayment\NewPay\NewPayCode;
 use Sxqibo\FastPayment\NewPay\QueryOrderScanPayService;
 use Sxqibo\FastPayment\NewPay\ScanPayQueryModel;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 
 require_once '../../vendor/autoload.php';
 
@@ -12,10 +14,13 @@ require_once '../../vendor/autoload.php';
 class TestScanPayQuery56
 {
     private $config;
+    private $logger;
 
-    public function __construct()
+
+    public function __construct($logger)
     {
         $this->config = include 'config.php';
+        $this->logger = $logger;
     }
 
     public function getConfig()
@@ -52,20 +57,32 @@ class TestScanPayQuery56
         $scanPayQueryModel->copy($data);
 
         $queryOrderScanPayService = new QueryOrderScanPayService();
-        $query                    = $queryOrderScanPayService->query($scanPayQueryModel);
-        var_dump($query);
+        $result                    = $queryOrderScanPayService->query($scanPayQueryModel);
+        var_dump($result);
+        $this->logger->info("退款查询结果：". json_encode($result, 256));
     }
 }
 
-function test1()
-{
-    $test = new TestScanPayQuery56();
+/**
+ * 日志相关
+ */
+// 创建一个日志记录器对象
+$logger = new Logger('newPayLogger');
 
-    $merId = $test->getConfig()['service_corp']['merch_id']; // 服务商-商户ID
+// 创建一个日志处理器对象，将日志记录到日志文件中
+$handler = new StreamHandler('./logfile.log');
+$logger->pushHandler($handler);
 
-    $orderId = $test->getConfig()['order_info']['scan_pay_order']; // 扫码时的订单号
+/**
+ * 扫码查询相关
+ */
+$test = new TestScanPayQuery56($logger);
 
-    $test->scanPayQuery($merId, $orderId);
-}
+$merId = $test->getConfig()['service_corp']['merch_id']; // 服务商-商户ID
 
-test1();
+$orderId = $test->getConfig()['order_info']['scan_pay_order']; // 扫码时的订单号
+
+$test->scanPayQuery($merId, $orderId);
+
+$logger->info("===以上为扫码 查询相关日志============");
+print "扫码查询 相关信息请查看日志！";

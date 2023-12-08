@@ -3,3 +3,4 @@
 /vendor
 /certs
 .composer.lock
+/samples/NewPay/logfile.log
