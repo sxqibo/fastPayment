@@ -9,8 +9,18 @@ require_once '../../vendor/autoload.php';
 /**
  * 主要测试 QueryOrderScanPayService 和 ScanPayQueryModel 两个类
  */
-class TestQueryOrderScanPay
+class TestScanPayQuery56
 {
+    private $config;
+
+    public function __construct() {
+        $this->config = include 'config.php';
+    }
+
+    public function getConfig() {
+        return $this->config;
+    }
+
     /**
      * 扫码支付查询
      *
@@ -35,8 +45,7 @@ class TestQueryOrderScanPay
         ];
 
         $scanPayQueryModel = new ScanPayQueryModel();
-        // 收款私钥
-        $privateKey = '';
+        $privateKey = $this->config['service_corp']['payment_private_key'];  // 付款私钥
         $scanPayQueryModel->setPrivateKey($privateKey);
         $scanPayQueryModel->copy($data);
 
@@ -48,10 +57,13 @@ class TestQueryOrderScanPay
 
 function test1()
 {
-    $merId = '11000008001';
-    $orderId = '2023112959734748';
-    $testQueryOrderScanPay = new TestQueryOrderScanPay();
-    $testQueryOrderScanPay->scanPayQuery($merId, $orderId);
+    $test = new TestScanPayQuery56();
+
+    $merId = $test->getConfig()['service_corp']['merch_id']; // 服务商-商户ID
+
+    $orderId = $test->getConfig()['order_info']['scan_pay_order']; // 扫码时的订单号
+
+    $test->scanPayQuery($merId, $orderId);
 }
 
 test1();

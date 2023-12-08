@@ -11,6 +11,16 @@ require_once '../../vendor/autoload.php';
  */
 class TestScanPay
 {
+    private $config;
+
+    public function __construct() {
+        $this->config = include 'config.php';
+    }
+
+    public function getConfig() {
+        return $this->config;
+    }
+
     public function scanPay($merId, $orderId, $weChatMchId)
     {
         $scanPayService = new ScanPayService();
@@ -29,8 +39,8 @@ class TestScanPay
             'weChatMchId' => $weChatMchId,
         ];
 
-        $privateKey = '';
-        $publicKey = '';
+        $privateKey = $this->config['service_corp']['payment_private_key'];
+        $publicKey = $this->config['service_corp']['payment_public_key'];
 
         $scanPayModel = new ScanPayModel();
         $scanPayModel->setPrivateKey($privateKey);
@@ -48,11 +58,13 @@ class TestScanPay
 
 function test1()
 {
-    $merId = '11000008001';
-    $orderId = substr(md5(rand()), 20);
-    $newPayTest = new TestScanPay();
-    $weChatMchId = '2309072230343403012';
-    $newPayTest->scanPay($merId, $orderId, $weChatMchId);
+    $test = new TestScanPay();
+
+    $merId = $test->getConfig()['service_corp']['merch_id'];  // 服务商-商户ID
+    $orderId = substr(md5(rand()), 20); // 订单号
+    $weChatMchId = $test->getConfig()['merchant_corp']['wechat_mch_id']; // 微信进件号
+
+    $test->scanPay($merId, $orderId, $weChatMchId);
 }
 
 test1();
