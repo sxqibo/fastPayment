@@ -13,11 +13,13 @@ class TestScanPayQuery56
 {
     private $config;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->config = include 'config.php';
     }
 
-    public function getConfig() {
+    public function getConfig()
+    {
         return $this->config;
     }
 
@@ -31,26 +33,26 @@ class TestScanPayQuery56
     public function scanPayQuery($merId, $orderId)
     {
         $data = [
-            'serialID' => md5(rand()),
-            'mode' => ScanPayQueryModel::MODE_SINGLE,
-            'type' => ScanPayQueryModel::TYPE_PAY,
-            'orderID' => $orderId,
+            'serialID'  => md5(rand()),
+            'mode'      => ScanPayQueryModel::MODE_SINGLE,
+            'type'      => ScanPayQueryModel::TYPE_PAY,
+            'orderID'   => $orderId,
             //            'orderID' => '',
             //            'beginTime' => '20230922110000',
             //            'endTime' => '20230922111059',
             'beginTime' => date('YmdH') . '0000',
-            'endTime' => date('YmdH') . '5959',
+            'endTime'   => date('YmdH') . '5959',
             //            'remark' => '',
             'partnerID' => $merId,
         ];
 
         $scanPayQueryModel = new ScanPayQueryModel();
-        $privateKey = $this->config['service_corp']['payment_private_key'];  // 付款私钥
+        $privateKey        = $this->config['service_corp']['payment_private_key'];  // 付款私钥
         $scanPayQueryModel->setPrivateKey($privateKey);
         $scanPayQueryModel->copy($data);
 
         $queryOrderScanPayService = new QueryOrderScanPayService();
-        $query = $queryOrderScanPayService->query($scanPayQueryModel);
+        $query                    = $queryOrderScanPayService->query($scanPayQueryModel);
         var_dump($query);
     }
 }

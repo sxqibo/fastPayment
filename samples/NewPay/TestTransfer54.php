@@ -64,9 +64,15 @@ function test1()
     $merId   = $test->getConfig()['service_corp']['merch_id']; // 服务商-商户ID
     $orderId = substr(md5(rand()), 20);
 
-    $payeeName    = $test->getConfig()['transfer_info']['user_name'];
-    $payeeAccount = $test->getConfig()['transfer_info']['user_card_number'];
-    $tranAmt      = $test->getConfig()['transfer_info']['transfer_amount'];
+    print "我的转账订单号是：" . $orderId;
+    print PHP_EOL . '----------' . PHP_EOL;
+    print "我的转账时间是：" . date('Ymd', time());
+    print PHP_EOL . '----------' . PHP_EOL;
+
+
+    $payeeName    = $test->getConfig()['transfer_info']['user_name'];           // 收款方姓名
+    $payeeAccount = $test->getConfig()['transfer_info']['user_card_number'];    // 收款方账户
+    $tranAmt      = $test->getConfig()['transfer_info']['transfer_amount'];     // 支付金额
 
     print PHP_EOL . '----------' . PHP_EOL;
     $test->singlePay($merId, $orderId, $payeeName, $payeeAccount, $tranAmt);
