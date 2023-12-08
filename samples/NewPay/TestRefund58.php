@@ -56,12 +56,12 @@ function test1()
     echo '............' . $orderId . PHP_EOL;
 
     // 原订单信息
-    $orgMerOrderId = $test->getConfig()['order_info']['org_mer_order_id']; // 原商户支付订单号，见查询参数：orderID
-    $orgSubmitTime = $test->getConfig()['order_info']['org_submit_time']; // 原订单支付下单请求时间，见查询参数：acquiringTime
-    $orderAmt      = $test->getConfig()['order_info']['order_amt']; // 原订单金额，见查询参数：orderAmount
+    $orgMerOrderId = $test->getConfig()['refund_info']['org_mer_order_id']; // 原商户支付订单号，见查询参数：orderID
+    $orgSubmitTime = $test->getConfig()['refund_info']['org_submit_time']; // 原订单支付下单请求时间，见查询参数：acquiringTime
+    $orderAmt      = $test->getConfig()['refund_info']['order_amt']; // 原订单金额，见查询参数：orderAmount
 
     // 退款信息
-    $refundOrderAmt = $test->getConfig()['order_info']['refund_order_amt']; // 退款金额， 见查询参数：
+    $refundOrderAmt = $test->getConfig()['refund_info']['refund_order_amt']; // 退款金额， 见查询参数：
 
     $test->refund($merId, $orderId, $orgMerOrderId, $orgSubmitTime, $orderAmt, $refundOrderAmt);
 }

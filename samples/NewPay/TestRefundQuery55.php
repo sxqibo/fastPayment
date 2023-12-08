@@ -54,8 +54,8 @@ function test1()
     $merId = $test->getConfig()['service_corp']['merch_id']; // 服务商-商户ID
 
     // 退款信息
-    $orgMerOrderId = $test->getConfig()['order_info']['refund_order']; // 订单号（退款订单号）
-    $orgSubmitTime = $test->getConfig()['order_info']['refund_time'];; // 退款提交时间
+    $orgMerOrderId = $test->getConfig()['refund_info']['refund_order']; // 订单号（退款订单号）
+    $orgSubmitTime = $test->getConfig()['refund_info']['refund_time'];; // 退款提交时间
 
     $test->query($merId, $orgMerOrderId, $orgSubmitTime);
 }
