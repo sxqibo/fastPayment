@@ -43,8 +43,8 @@ function test1()
     echo '............' . $orderId . PHP_EOL;
     $orgMerOrderId = ''; // 原商户支付订单号，见查询参数：orderID
     $orgSubmitTime = ''; // 原订单支付下单请求时间，见查询参数：acquiringTime
-    $orderAmt = ''; // 原订单金额，见查询参数：orderAmount
-    $refundOrderAmt = ''; // 退款金额， 见查询参数：
+    $orderAmt = '0.02'; // 原订单金额，见查询参数：orderAmount
+    $refundOrderAmt = '0.02'; // 退款金额， 见查询参数：
     $newPayTest = new TestRefund();
     $newPayTest->refund($merId, $orderId, $orgMerOrderId, $orgSubmitTime, $orderAmt, $refundOrderAmt);
 }

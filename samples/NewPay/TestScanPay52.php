@@ -48,10 +48,10 @@ class TestScanPay
 
 function test1()
 {
-    $merId = '';
+    $merId = '11000008001';
     $orderId = substr(md5(rand()), 20);
     $newPayTest = new TestScanPay();
-    $weChatMchId = '';
+    $weChatMchId = '2309072230343403012';
     $newPayTest->scanPay($merId, $orderId, $weChatMchId);
 }
 
