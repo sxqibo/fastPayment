@@ -4,3 +4,9 @@
 /certs
 .composer.lock
 /samples/NewPay/logfile.log
+*.DS_Store
+*.log
+*.lock
+*.pem
+*.p12
+composer.lock
