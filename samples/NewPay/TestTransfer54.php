@@ -31,7 +31,7 @@ class TestTransfer54
             'merOrderId'   => $orderId,
             'payeeName'    => $payeeName,
             'payeeAccount' => $payeeAccount,
-            'tranAmt'      => $tranAmt,
+            'tranAmt'      => (string)$tranAmt,
 
             'payType'   => SinglePayInfoModel::PAYTYPE_BANK,
             'auditFlag' => SinglePayInfoModel::AUDITFLAG_NO,
