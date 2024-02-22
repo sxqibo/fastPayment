@@ -54,6 +54,7 @@ abstract class BaseModel
 
         unset($data['privateKey']);
         unset($data['publicKey']);
+        unset($data['config']);
 
         return $data;
     }
