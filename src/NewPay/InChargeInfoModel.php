@@ -25,29 +25,33 @@ final class InChargeInfoModel extends BaseModel
     private $riskExpand;
     private $goodsInfo;
     private $orderSubject;
-    private $orderDesc;
-    private $payLimit;
+//    private $orderDesc;
+//    private $payLimit;
     private $appId;
     private $openId;
     private $aliAppId;
     private $buyerLogonId;
     private $buyerId;
     private $merchantId;
-    private $holderName;
-    private $identityType;
-    private $identityCode;
-    private $minAge;
+//    private $holderName;
+//    private $identityType;
+//    private $identityCode;
+//    private $minAge;
 
     public function __construct()
     {
         $this->notifyServerUrl = 'http://xxx.xxx.com/xxx';
-        $this->merUserIp = '';
+        $this->merUserIp = '211.12.38.88';
         $this->appId = '';
         $this->openId = '';
         $this->aliAppId = '';
         $this->buyerLogonId = '';
         $this->buyerId = '';
         $this->merchantId = '';
+        $this->expirTime = 120;
+        $this->riskExpand = '';
+        $this->goodsInfo = '';
+
     }
 
     public function getModelData(): array
@@ -56,7 +60,7 @@ final class InChargeInfoModel extends BaseModel
 
         unset($data['holderName']);
         unset($data['identityType']);
-        unset($data['$identityCode']);
+        unset($data['identityCode']);
         unset($data['minAge']);
 
         return $data;

@@ -44,7 +44,7 @@ final class InChargeModel extends BaseModel
     private $submitTime;
     private $msgCiphertext;
     private $signType;
-    private $remark;
+//    private $remark;
     private $merAttach;
     private $charset;
     private $signValue;
@@ -109,7 +109,11 @@ final class InChargeModel extends BaseModel
 
     public function verifySign($responseData)
     {
-        return RsaUtil::verifySignForBase64($responseData['signValue'], $this->publicKey,
-            Util::getStringData(self::VERIFY_FIELD, $responseData));
+        $data = $responseData;
+        $data['payInfo'] = str_replace('\\', '', json_encode($responseData['payInfo'], JSON_UNESCAPED_UNICODE));
+
+        return RsaUtil::verifySignForBase64($responseData['signValue'],
+            $this->publicKey,
+            Util::getStringData(self::VERIFY_FIELD, $data));
     }
 }
