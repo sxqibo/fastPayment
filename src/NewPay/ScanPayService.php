@@ -25,12 +25,12 @@ final class ScanPayService
         $content = json_decode($content, true);
 
         // 对返回值的验签
-        //$bool = $scanPayModel->verifySign($content);
+        $bool = $scanPayModel->verifySign($content);
 
-        // if ($bool) {
+        if ($bool) {
             return $content;
-        // }
+        }
 
-        // return '返回值验签失败';
+        return '返回值验签失败';
     }
 }

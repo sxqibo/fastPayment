@@ -47,8 +47,8 @@ class TestInCharge
         $inChargeModel   = new \Sxqibo\FastPayment\NewPay\InchargeModel();
         $inChargeService = new \Sxqibo\FastPayment\NewPay\InChargeService();
 
-        $privateKey = $this->config['service_corp']['refund_private_key'];
-        $publicKey  = $this->config['service_corp']['refund_public_key'];
+        $privateKey = $this->config['service_corp']['new_private_key'];
+        $publicKey  = $this->config['service_corp']['new_public_key'];
 
         $inChargeModel->setPrivateKey($privateKey);
         $inChargeModel->setPublicKey($publicKey);
@@ -86,5 +86,5 @@ $logger->info("微信公众号支付订单号为：" . $orderId);
 
 $test->mpPay($orderId);
 
-$logger->info("===以上为以上为微信公众号支付 相关日志============");
+$logger->info("===以上为微信公众号支付 相关日志============");
 print "微信公众号支付 相关信息请查看日志！";

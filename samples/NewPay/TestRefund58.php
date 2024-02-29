@@ -37,8 +37,8 @@ class TestRefund
         $refundModel   = new \Sxqibo\FastPayment\NewPay\RefundModel();
         $refundService = new \Sxqibo\FastPayment\NewPay\RefundService();
 
-        $privateKey = $this->config['service_corp']['refund_private_key'];
-        $publicKey  = $this->config['service_corp']['refund_public_key'];
+        $privateKey = $this->config['service_corp']['new_private_key'];
+        $publicKey  = $this->config['service_corp']['new_public_key'];
 
         $refundModel->setPrivateKey($privateKey);
         $refundModel->setPublicKey($publicKey);
