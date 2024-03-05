@@ -43,6 +43,20 @@ final class H5InfoModel extends BaseModel
         $this->frontUrl = 'http://xxx.xxx.com/xxx';
         $this->notifyUrl = 'http://xxx.xxx.com/xxx';
         $this->merUserIp = '192.168.0.1';
+
+        $this->exPayMode = '';
+        $this->cardNo = '';
+        $this->holderName = '';
+        $this->identityCode = '';
+        $this->merUserId = '';
+        $this->orderExpireTime = 120;
+        $this->riskExpand = '';
+        $this->goodsInfo = '';
+        $this->orderDesc = '';
+        $this->merchantId = '';
+        $this->bizProtocolNo = '';
+        $this->payProtocolNo = '';
+        $this->payLimit = '';
     }
 
     public function getModelData(): array
@@ -61,6 +75,12 @@ final class H5InfoModel extends BaseModel
         foreach ($data as $key => $value) {
             $this->$key = $value;
         }
+
+        if ($data['payType'] == 'HnaALL') {
+            $this->exPayMode = '1';
+        }
+
+        $this->merchantId = json_encode(['02' => $data['merchantId']], JSON_UNESCAPED_UNICODE);
     }
 
     public function verify()

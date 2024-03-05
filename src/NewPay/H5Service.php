@@ -13,15 +13,6 @@ final class H5Service
     {
         $request = $h5Model->getModelData();
 
-        $content = HttpUtil::post($request, H5Model::REQUEST_URL);
-
-        $content = json_decode($content, true);
-        $bool = $h5Model->verifySign($content);
-
-        if ($bool) {
-            return $content;
-        }
-
-        return [$content, '返回值验签失败'];
+        return HttpUtil::post($request, H5Model::REQUEST_URL);
     }
 }
