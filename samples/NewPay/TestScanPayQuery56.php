@@ -80,7 +80,7 @@ $test = new TestScanPayQuery56($logger);
 
 $merId = $test->getConfig()['service_corp']['merch_id']; // 服务商-商户ID
 
-$orderId = $test->getConfig()['order_info']['scan_pay_order']; // 扫码时的订单号
+$orderId = $test->getConfig()['scan_info']['scan_pay_order']; // 扫码时的订单号
 
 $test->scanPayQuery($merId, $orderId);
 

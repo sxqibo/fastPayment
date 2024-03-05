@@ -35,7 +35,7 @@ return [
         /**
          * 服务商ID
          */
-        'merch_id'             => '', // 服务商商户ID
+        'merch_id'             => '', // 服务商-"XXX"-商户ID
 
         /**
          * 1-1 收款私钥
@@ -59,12 +59,12 @@ return [
         'transfer_public_key'  => '',
 
         /**
-         * 3-1 新私钥（用于退款和公众号支付）
+         * 3-1 新私钥（用于退款、公众号支付、H5支付）
          */
         'new_private_key'   => '',
 
         /**
-         * 3-2 新公钥（用于退款和公众号支付）
+         * 3-2 新公钥（用于退款和公众号支付、H5支付）
          */
         'new_public_key'    => '',
 
@@ -75,7 +75,9 @@ return [
      * 商户名称： A-1 公司
      */
     'merchant_corp'   => [
-        'wechat_mch_id' => '', // 微信进件号 - 襄阳市萃物商贸有限公司
+        // 'wechat_mch_id' => '', // 微信进件号1 - A公司
+        // 'wechat_mch_id' => '', // 微信进件号2 - B公司
+        'alipay_mch_id' => '', // 支付宝进件号 - C公司
     ],
 
     /**
@@ -85,7 +87,7 @@ return [
      * 第一步： 张三 通过扫码支付了 1 元， 订单号为：123456
      * 我生成的订单号是：4c17daa00f8c
      */
-    'order_info'      => [
+    'scan_info'      => [
         /**
          * 交易金额
          */
@@ -93,7 +95,7 @@ return [
         /**
          * 扫码支付信息（用于查询支付）
          */
-        'scan_pay_order'  => '',  // 支付订单号（我生成的订单号，不是新生返回的订单号）
+        'scan_pay_order'  => '4c17daa00f8c',  // 支付订单号（我生成的订单号，不是新生返回的订单号）
     ],
 
     /**
@@ -110,8 +112,8 @@ return [
         // 金额信息
         'transfer_amount'  => 1, // 收款金额
         // 订单信息（查询需要）
-        'order_id'         => '', // 我生成的转账的订单号
-        'submit_time'      => '', // 我的转账提交时间
+        'order_id'         => '14279c06e7f1', // 我生成的转账的订单号
+        'submit_time'      => '20231208', // 我的转账提交时间
     ],
 
     /**
@@ -125,8 +127,8 @@ return [
          * 退款操作
          */
         // 支付时的信息
-        'org_mer_order_id' => '', // 原商户支付订单号，见查询参数：orderID
-        'org_submit_time'  => '', // 支付的时间
+        'org_mer_order_id' => '4c17daa00f8c', // 原商户支付订单号，见查询参数：orderID
+        'org_submit_time'  => '20231208163614', // 支付的时间
         'order_amt'        => '1', // 原订单金额，见查询参数：orderAmount
         // 退款金额
         'refund_order_amt' => '0.2', // 退款金额
@@ -134,48 +136,48 @@ return [
         /**
          * 退款信息（用于查询退款）
          */
-        'refund_order'     => '',     // 退款订单号
-        'refund_time'      => '',   // 退款提交时间
+        'refund_order'     => '2402281751292329151',     // 退款订单号
+        'refund_time'      => '20240228',   // 退款提交时间
     ],
 
-    /**
-     * JSAPI支付信息
-     *
-     * 场景：
-     * 第三步：张三 退部分款项，第一次退了 0.2 元， 退款单号为：234567，时间为：20231114113822
-     */
-    'charge_info'     => [
-        /**
-         * 退款操作
-         */
-        // 支付时的信息
-        'org_mer_order_id' => '', // 原商户支付订单号，见查询参数：orderID
-        'org_submit_time'  => '', // 支付的时间
-        'order_amt'        => '1', // 原订单金额，见查询参数：orderAmount
-
-        /**
-         * JSAPI支付信息（用于查询JSAPI）
-         */
-        'charge_order'     => '',     // JSAPI订单号
-        'charge_time'      => '',   // JSAPI提交时间
-    ],
 
     /**
      * 公众号支付信息
      */
     'mp_info'         => [
+        /**
+         * 支付信息
+         */
         'pay_amount' => '1', // 交易金额
         'orderSubject'  => 'test-title',  // 标题
         'goodsInfo'     => 'test-info',  // 描述
-    ],
 
+        /**
+         * 查询信息
+         */
+        'charge_order'     => '3bf04867f7dec66a2789',     // JSAPI订单号
+        'charge_time'      => '20240229',   // JSAPI提交时间
+    ],
 
     /**
      * 公众号信息
      */
     'wechat_app_info' => [
-        'appId'  => '', // 微信公众号appid
-        'openId' => '',// 关注公众号的某一个人
+        'appId'  => '', // 微信公众号appid，目前这是“海南坤裕科技有限公司”下的一个公众号
+        'openId' => '',// 关注公众号的某一个人，目前这是“杨”的号
+    ],
+
+    /**
+     * 支付宝H5支付信息
+     */
+    'h5_info'         => [
+        // 支付信息
+        'pay_amount' =>  0.01, // 交易金额
+        'orderSubject'  => 'test-title',  // 标题
+
+        //查询信息
+        'h5_order'     => 'f555b0c30bea95b2f742',     // 支付宝h5订单号
+        'h5_time'      => '20240505',   // 支付宝h5提交时间
     ],
 
 ];

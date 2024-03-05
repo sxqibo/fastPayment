@@ -35,7 +35,7 @@ class TestScanPay
         $data = [
             'merId'       => $merId,        // 商户ID
             'merOrderNum' => $merOrderNum,  // 订单ID
-            'tranAmt'     => $this->config['order_info']['scan_pay_amount'],   // 支付金额（单位：分）
+            'tranAmt'     => $this->config['scan_info']['scan_pay_amount'],   // 支付金额（单位：分）
             'orgCode'     => ScanPayModel::ORGCODE_WECHATPAY,   // 支付方式（微信：ORGCODE_WECHATPAY 阿里：ORGCODE_ALIPAY）
             'weChatMchId' => $weChatMchId,  // 进件号
         ];
