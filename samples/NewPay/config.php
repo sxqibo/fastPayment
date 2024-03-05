@@ -172,8 +172,10 @@ return [
      */
     'h5_info'         => [
         // 支付信息
-        'pay_amount' =>  0.01, // 交易金额
-        'orderSubject'  => 'test-title',  // 标题
+        'pay_amount'    =>  0.01, // 交易金额,以元为单位
+        'order_subject' => 'test-title',  // 标题
+        'front_url'     => 'https://www.xxx.com/fontNotifyUrl.do', // 新生交易完成后，前台通知商户地址
+        'notify_url'    => 'https://www.xxx.com/erverNotifyUrl.do', // 新生交易完成后，异步通知商户地址
 
         //查询信息
         'h5_order'     => 'f555b0c30bea95b2f742',     // 支付宝h5订单号

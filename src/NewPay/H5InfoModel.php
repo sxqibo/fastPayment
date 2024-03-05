@@ -40,6 +40,7 @@ final class H5InfoModel extends BaseModel
 
     public function __construct()
     {
+        $this->payType = 'HnaALL'; // 默认
         $this->frontUrl = 'http://xxx.xxx.com/xxx';
         $this->notifyUrl = 'http://xxx.xxx.com/xxx';
         $this->merUserIp = '192.168.0.1';
@@ -76,7 +77,7 @@ final class H5InfoModel extends BaseModel
             $this->$key = $value;
         }
 
-        if ($data['payType'] == 'HnaALL') {
+        if ($this->payType == 'HnaALL') {
             $this->exPayMode = '1';
         }
 

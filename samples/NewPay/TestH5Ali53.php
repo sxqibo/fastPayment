@@ -33,9 +33,9 @@ class TestH5Ali53
             // 2、订单信息
             'merOrderId'   => $orderId,
             'tranAmt'      => $this->config['h5_info']['pay_amount'],
-            'orderSubject' => $this->config['h5_info']['orderSubject'],
-            'payType'      => 'HnaALL', // 必填：HnaALL 为在H5 收银台页面选择支付方式(默认)
-
+            'orderSubject' => $this->config['h5_info']['order_subject'],
+            'frontUrl'     => $this->config['h5_info']['front_url'],
+            'notifyUrl'    => $this->config['h5_info']['notify_url'],
         ];
 
         $inChargeModel   = new \Sxqibo\FastPayment\NewPay\H5Model();
@@ -53,7 +53,6 @@ class TestH5Ali53
 
         echo $result;
         $this->logger->info("支付宝H5支付相关信息：" . $result);
-
     }
 }
 

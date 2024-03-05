@@ -15,7 +15,10 @@ final class H5Model extends BaseModel
     const VERSION = '2.0';
 
     /** @var string 交易代码 */
-    const TRANCODE = 'MUP11';
+    const TRAN_CODE = 'MUP11';
+
+    /** @var string 付款方式 */
+    const PAY_TYPE = 'HnaALL';
 
     const IS_NOT_FIELD = [
         ['merId', '商户ID 不能为空'],
@@ -36,6 +39,8 @@ final class H5Model extends BaseModel
 
     private $version;
     private $tranCode;
+
+    private $payType;
     private $merId;
     private $merOrderId;
     private $submitTime;
@@ -50,12 +55,12 @@ final class H5Model extends BaseModel
     public function __construct()
     {
         $this->version = self::VERSION;
-        $this->tranCode = self::TRANCODE;
+        $this->tranCode = self::TRAN_CODE;
+        $this->payType = self::PAY_TYPE;
         $this->signType = self::SIGNTYPE_RSA;
         $this->charset = self::CHARSET_UTF8;
         $this->submitTime = date('YmdHis', time());
         $this->merAttach = '';
-
         $this->h5InfoModel = new H5InfoModel();
     }
 
@@ -64,6 +69,7 @@ final class H5Model extends BaseModel
      *
      * @param $data
      * @return void
+     * @throws \Exception
      */
     public function copy($data)
     {
