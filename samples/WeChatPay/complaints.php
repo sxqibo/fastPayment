@@ -31,14 +31,14 @@ try {
     dd($result, '测试查询投诉单列表');
 
     // 测试查询投诉单详情
-    $complainId = '';
+    $complainId = ''; // 填写具体数值
     if ($complainId) {
         $result = $service->getBillDetail($complainId);
         dd($result, '测试查询投诉单详情');
     }
 
     // 测试查询投诉单协商历史
-    $complainId = '';
+    $complainId = ''; // 填写具体数值
     if ($complainId) {
         $result = $service->getBillNegotiationHistory($complainId);
         dd($result, '测试查询投诉单协商历史');
