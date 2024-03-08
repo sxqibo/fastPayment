@@ -174,5 +174,21 @@ class BaseService
         return $data;
     }
 
+    /**
+     * 数据解密
+     *  目前用在手机号解密上
+     * @param $str string 密文
+     * @param $certPrivate string 私钥
+     *
+     * @return string 明文
+     */
+    function getDecrypt($str, $certPrivate)
+    {
+        $decrypted = '';
+
+        openssl_private_decrypt(base64_decode($str), $decrypted, $certPrivate, OPENSSL_PKCS1_OAEP_PADDING);
+
+        return $decrypted;
+    }
 }
 
