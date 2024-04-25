@@ -1,6 +1,6 @@
 {
   "name": "sxqibo/fast-payment",
-  "description": "通联支付网上收银统一下单接口，提供统一支付、统一扫码、交易查询、推送通知、退款等功能，新增微信批量转账和查询功能",
+  "description": "提供统一支付、统一扫码、交易查询、推送通知、退款等功能，新增微信批量转账和查询功能",
   "type": "library",
   "keywords": [
     "union",
@@ -34,14 +34,7 @@
     "ext-curl": "*",
     "ext-json": "*",
     "ext-simplexml": "*",
-    "ext-libxml": "*",
-    "overtrue/wechat": "^5.6",
-    "hyperf/pimple": "~2.2.0"
-  },
-  "config": {
-    "allow-plugins": {
-      "easywechat-composer/easywechat-composer": true
-    }
+    "ext-libxml": "*"
   },
   "require-dev": {
     "monolog/monolog": "^1.0|^2.1"
