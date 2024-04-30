@@ -8,7 +8,8 @@ use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use Exception;
-use WechatPay\GuzzleMiddleware\Util\MediaUtil;
+use Sxqibo\FastPayment\WeChatPay\MediaUtil;
+
 
 class Client
 {
@@ -169,7 +170,7 @@ class Client
         $media = new MediaUtil($fileFullName);
 
         $client   = $this->getClient();
-        $resp = $client->post('https://api.mch.weixin.qq.com/v3/merchant/media/upload', [
+        $resp = $client->post('https://api.mch.weixin.qq.com/v3/merchant-service/images/upload', [
             'body'    => $media->getStream(),
             'headers' => [
                 'Accept'       => 'application/json',
