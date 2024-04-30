@@ -225,27 +225,7 @@ class Complaints extends BaseService
      */
     public function uploadImage(string $fileFullName): array
     {
-        $endPoint = [
-            'url'    => $this->base . "/merchant-service/images/upload",
-            'method' => 'POST',
-        ];
-
-        // todo 处理图片，得到如下两个参数
-        $fileName = '';
-        $sha256 = '';
-        $bitFile = ''; // 处理后的二进制图片
-
-        $handleHeader = [
-            'file' => $bitFile, //必填，将媒体图片进行二进制转换，得到的媒体图片二进制内容，在请求body中上传此二进制内容。媒体图片只支持jpg、bmp、png格式，文件大小不能超过2M
-            'meta' => [
-                'filename' => $fileName, //必填，文件名，如：16968341945092.jpg
-                'sha256'   => $sha256,   //必填，文件sha256编码,如：544acbea3112b7259796dbda33dd39f079549f58842975eb8df167ccb2fcae42
-            ]
-        ];
-
-        $headers = array_merge($handleHeader, $this->headers);
-
-        $result = $this->client->requestApi($endPoint, [], [], $headers, true);
+        $result = $this->client->requestImage($fileFullName);
 
         return $this->handleResult($result);
     }
