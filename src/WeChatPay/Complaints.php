@@ -225,7 +225,7 @@ class Complaints extends BaseService
      */
     public function uploadImage(string $fileFullName): array
     {
-        $result = $this->client->requestImage($fileFullName);
+        $result = $this->client->uploadImage($fileFullName);
 
         return $this->handleResult($result);
     }
@@ -243,7 +243,8 @@ class Complaints extends BaseService
             'method' => 'GET',
         ];
 
-        $result = $this->client->requestApi($endPoint, [], [], $this->headers, true);
+
+        $result = $this->client->requestImage("https://api.mch.weixin.qq.com/v3/merchant-service/images/{$mediaId}");
 
         return $this->handleResult($result);
     }

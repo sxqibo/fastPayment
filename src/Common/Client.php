@@ -165,7 +165,7 @@ class Client
         };
     }
 
-    public function requestImage(string $fileFullName)
+    public function uploadImage(string $fileFullName)
     {
         $media = new MediaUtil($fileFullName);
 
@@ -179,5 +179,17 @@ class Client
         ]);
 
         return $resp->getBody()->getContents();
+    }
+
+    public function requestImage(string $url)
+    {
+        $client   = $this->getClient();
+        $resp = $client->get($url,  [
+            'headers' => [
+                'Accept' => 'application/json',
+            ]
+        ]);
+
+        return $resp->getBody();
     }
 }
