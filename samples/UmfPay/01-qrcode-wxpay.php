@@ -5,6 +5,7 @@ use Sxqibo\FastPayment\UmfPay\UmfService;
 
 /**
  * 扫码支付
+ * @doc https://www.yuque.com/umpayer/tv9uf6/dyx054r5g0yz626r
  * @param $appId
  * @param $pub
  * @param $private
