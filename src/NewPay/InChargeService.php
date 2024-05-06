@@ -2,6 +2,8 @@
 
 namespace Sxqibo\FastPayment\NewPay;
 
+use Sxqibo\FastPayment\Common\HttpUtil;
+
 /**
  * 5.1 微信公众号&支付宝生活号
  *

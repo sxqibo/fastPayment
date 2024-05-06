@@ -14,6 +14,7 @@ namespace Sxqibo\FastPayment\WeChatPay;
 use Exception;
 use Sxqibo\FastPayment\Common\Client;
 
+use WeChatPay\Builder;
 
 /**
  * 微信投诉
@@ -238,18 +239,36 @@ class Complaints extends BaseService
      */
     public function getMediaData(string $mediaId): array
     {
-        $endPoint = [
-            'url'    => $this->base . "/merchant-service/images/{$mediaId}",
-            'method' => 'GET',
+
+        $url = "https://api.mch.weixin.qq.com/v3/merchant-service/images/{$mediaId}";
+
+        // 设置请求URL
+        $url2 = 'https://api.mch.weixin.qq.com/v3/certificates';
+        // 构造签名串
+        $timestamp = time();
+        $nonce = bin2hex(random_bytes(16));
+        $message = $timestamp."\n".$nonce."\n"."GET"."\n".$url2."\n"."";
+
+        // 计算签名值
+        $signature = base64_encode(hash_hmac('sha256', $message, base64_decode($this->config['mch_v3_key']), true));
+
+        $headers =[
+            'Authorization' => 'WECHATPAY2-SHA256-RSA2048 '.$this->config['mch_id']  .':'.$signature.':'.$nonce.':'.$timestamp,
+            'Accept' => 'application/json',
         ];
 
+        $resp = $this->client->getClient()->get($url,  [
+            'headers' => $headers
+        ]);
 
-        $result = $this->client->requestImage("https://api.mch.weixin.qq.com/v3/merchant-service/images/{$mediaId}");
+        $result = $resp->getBody();
 
         return $this->handleResult($result);
     }
 
-/**
+
+
+    /**
      * 卸载连接实例
      * @return void
      */

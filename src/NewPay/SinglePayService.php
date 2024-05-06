@@ -2,6 +2,8 @@
 
 namespace Sxqibo\FastPayment\NewPay;
 
+use Sxqibo\FastPayment\Common\HttpUtil;
+
 /**
  * 5.4 付款到银行
  *

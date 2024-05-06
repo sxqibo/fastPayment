@@ -2,6 +2,8 @@
 
 namespace Sxqibo\FastPayment\NewPay;
 
+use Sxqibo\FastPayment\Common\HttpUtil;
+
 /**
  * 5.3 支付宝H5
  *

@@ -2,6 +2,8 @@
 
 namespace Sxqibo\FastPayment\NewPay;
 
+use Sxqibo\FastPayment\Common\HttpUtil;
+
 /**
  * 查询接口
  * 类说明：对应新生支付文档 5.5

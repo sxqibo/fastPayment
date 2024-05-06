@@ -2,6 +2,8 @@
 
 namespace Sxqibo\FastPayment\NewPay;
 
+use Sxqibo\FastPayment\Common\HttpUtil;
+
 /**
  * 微信&支付宝扫码（C扫B）
  * 新生支付文档 5.2

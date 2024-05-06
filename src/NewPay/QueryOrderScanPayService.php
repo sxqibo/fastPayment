@@ -3,7 +3,7 @@
 namespace Sxqibo\FastPayment\NewPay;
 
 use Exception;
-use GuzzleHttp\Client;
+use Sxqibo\FastPayment\Common\HttpUtil;
 
 /**
  * 查询接口-扫码API

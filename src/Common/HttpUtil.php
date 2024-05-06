@@ -1,6 +1,6 @@
 <?php
 
-namespace Sxqibo\FastPayment\NewPay;
+namespace Sxqibo\FastPayment\Common;
 
 use GuzzleHttp\Client;
 
