@@ -17,11 +17,11 @@ final class HttpUtil
      * @return string
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public static function post($requestParam, $reuqestUrl)
+    public static function post($requestParam, $requestUrl): string
     {
         $client = new Client();
 
-        $result = $client->request('POST', $reuqestUrl, [
+        $result = $client->request('POST', $requestUrl, [
             'form_params' => $requestParam
         ]);
 
