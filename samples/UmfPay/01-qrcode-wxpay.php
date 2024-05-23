@@ -23,7 +23,9 @@ function qrcode($config)
 
     // 扫码信息
     $scanInfo                  = $config['scan_info'];
-    $scanInfo['scancode_type'] = 'WECHAT'; // 微信
+
+    // 接口业务参数列表
+    $scanInfo['scancode_type'] = 'WECHAT'; // 扫码类型：微信
 
     // 支付
     $result = (new UmfService($appId, $pub, $private))->submit($scanInfo);
