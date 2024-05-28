@@ -103,7 +103,7 @@ class Client
     /**
      * @return mixed
      */
-    protected function getClient()
+    public function getClient()
     {
         if (!isset(static::$clientInstance)) {
             $handlerStack = HandlerStack::create(new CurlHandler());

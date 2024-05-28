@@ -6,11 +6,12 @@ use Sxqibo\FastPayment\Common\HttpUtil;
 
 
 /**
- *
+ * 联动支付
+ * @doc https://www.yuque.com/umpayer/tv9uf6
  */
 class UmfService
 {
-    private $payRequestUrl = 'http://pay.soopay.net/spay/pay/payservice.do';
+    private $payRequestUrl = 'https://pay.soopay.net/spay/pay/payservice.do';
     private $charset = 'UTF-8';
     private $signType = 'RSA';
     private $resFormat = 'HTML';
@@ -41,6 +42,7 @@ class UmfService
 
     /**
      * 发起API请求
+     * @doc https://www.yuque.com/umpayer/tv9uf6/dyx054r5g0yz626r
      * @param $requestParams
      * @return array|string
      * @throws \GuzzleHttp\Exception\GuzzleException
@@ -51,17 +53,21 @@ class UmfService
         $defaultParams = [
             'charset'    => $this->charset,
             'sign_type'  => $this->signType,
-            'res_format' => $this->resFormat,
+            'res_format' => $this->resFormat,  // 响应数据格式
             'version'    => $this->version,
             'amt_type'   => 'RMB',
             'mer_id'     => $this->merId,
         ];
-
-        $params         = array_merge($defaultParams, $requestParams);
-        $params         = $this->doEncrypt($params);
-        $params['sign'] = $this->generateSign($params);
-
+        $params              = array_merge($defaultParams, $requestParams);
+        // 敏感字段加密
+        $params              = $this->doEncrypt($params);
+        // 签名
+        $params['sign']      = $this->generateSign($params);
         $response = HttpUtil::post($params, $this->payRequestUrl);
+
+        // 报文
+        // $paramAll = http_build_query($params);
+        //$response = $this->get_curl($this->payRequestUrl, $paramAll); // 这个方法可以看到发送的报文，故先留着
         if (!$response) {
             throw new \Exception('请求接口失败或网络连接异常');
         }
@@ -74,6 +80,7 @@ class UmfService
 
     /**
      * 获取支付跳转链接
+     * @doc https://www.yuque.com/umpayer/tv9uf6/ev6zzyni42nrr65f
      * @param $params
      * @return string
      * @throws \Exception
@@ -81,17 +88,22 @@ class UmfService
     public function getPayUrl($requestParams): string
     {
         $defaultParams = [
-            'charset'    => $this->charset,
-            'sign_type'  => $this->signType,
-            'res_format' => $this->resFormat,
-            'version'    => $this->version,
+            // 一：接口协议参数列表
+            'service'    => '',                 // 接口名称
+            'charset'    => $this->charset,     // 参数字符编码集
+            'sign_type'  => $this->signType,    // 签名方式
+            'sign'       => '',                 // 签名
+            'res_format' => $this->resFormat,   // 响应数据格式
+            'version'    => $this->version,     // 版本号
+
+            // 二： 接口业务参数列表
+            'mer_id'     => $this->merId, // 商户编号
             'amt_type'   => 'RMB',
-            'mer_id'     => $this->merId,
         ];
 
         $params         = array_merge($defaultParams, $requestParams);
         $params         = $this->doEncrypt($params);
-        $params['sign'] = $this->generateSign($params);
+        $params['sign'] = $this->generateSign($params); // 签名
 
         return $this->payRequestUrl . '?' . http_build_query($params);
     }
@@ -166,6 +178,7 @@ class UmfService
 
     /**
      * 请求参数签名
+     * @doc https://www.yuque.com/umpayer/tv9uf6/wlp6efsi6nitxug7
      * @param $param
      * @return string
      * @throws \Exception
@@ -193,7 +206,7 @@ class UmfService
      */
     private function doEncrypt($param)
     {
-        $chkKeys = array(
+        $chkKeys = [
             "card_id",
             "valid_date",
             "cvv2",
@@ -209,7 +222,7 @@ class UmfService
             "account_name",
             "bank_account",
             "endDate",
-        );
+        ];
         foreach ($chkKeys as $key) {
             if (isset($param[$key])) {
                 $encrypted = $this->rsaPublicEncrypt($param[$key]);
@@ -286,5 +299,52 @@ class UmfService
         }
         openssl_private_decrypt(base64_decode($data), $decrypted, $pKeyId);
         return $decrypted;
+    }
+
+    function get_curl($url, $post=0, $referer=0, $cookie=0, $header=0, $ua=0, $nobaody=0, $addheader=0, $location=0)
+    {
+        // 发送的报文，故先留着
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        $httpheader[] = "Accept: */*";
+        $httpheader[] = "Accept-Encoding: gzip,deflate,sdch";
+        $httpheader[] = "Accept-Language: zh-CN,zh;q=0.8";
+        $httpheader[] = "Connection: close";
+        if($addheader){
+            $httpheader = array_merge($httpheader, $addheader);
+        }
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $httpheader);
+        if ($post) {
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+        }
+        if ($header) {
+            curl_setopt($ch, CURLOPT_HEADER, true);
+        }
+        if ($cookie) {
+            curl_setopt($ch, CURLOPT_COOKIE, $cookie);
+        }
+        if($referer){
+            curl_setopt($ch, CURLOPT_REFERER, $referer);
+        }
+        if ($ua) {
+            curl_setopt($ch, CURLOPT_USERAGENT, $ua);
+        }
+        else {
+            curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Linux; U; Android 4.0.4; es-mx; HTC_One_X Build/IMM76D) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0");
+        }
+        if ($nobaody) {
+            curl_setopt($ch, CURLOPT_NOBODY, 1);
+        }
+        if ($location) {
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        }
+        curl_setopt($ch, CURLOPT_ENCODING, "gzip");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $ret = curl_exec($ch);
+        curl_close($ch);
+        return $ret;
     }
 }
