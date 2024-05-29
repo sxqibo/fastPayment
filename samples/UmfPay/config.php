@@ -3,23 +3,24 @@
 return [
     // 基本信息
     'basic'     => [
-        'appId'   => '',
+        'appid'   => '',
         'pub'     => '',
-        'private' => '',
     ],
 
-    // 扫码信息
+    // 扫码信息，说明：没有值的千万不能传值，要不报验签失败
     'scan_info' => [
-        'service'       => 'active_scancode_order_new',
-        'notify_url'    => '',
-        'goods_inf'     => '商品信息',
-        'order_id'      => time(),
-        'mer_date'      => date("Ymd"),
-        'amount'        => 100,
-        'user_ip'       => '127.0.0.1',
-        'scancode_type' => 'UNION', // 支付宝支付
+        // 一：接口协议参数列表
+        'service'       => 'active_scancode_order_new', // 接口名称（统一下单）@doc: https://www.yuque.com/umpayer/tv9uf6/dyx054r5g0yz626r
+        // 二： 接口业务参数列表
+        'notify_url'    => 'https://www.sxqibo.com/notify.php',          // 服务器异步通知页面路径
+        'goods_inf'     => '商品信息',   // 商品描述信息
+        'order_id'      => time(),      // 商户唯一订单号
+        'mer_date'      => date("Ymd"),     // 原商户订单日期
+        'amount'        => 100,         // 付款金额，如果是人民币，则以分为单位
+        'user_ip'       => '127.0.0.1', // 用户IP地址
         'mer_flag'      => 'KMER',
-        'consumer_id'   => '',
+        'app_id'        => 'wx88127142b07ec0e0',
+        //'scancode_type' => 'UNION', // 这个在业务中必传
     ],
 
     // 公众号支付信息
