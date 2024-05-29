@@ -17,7 +17,7 @@ return [
         'order_id'      => time(),      // 商户唯一订单号
         'mer_date'      => date("Ymd"),     // 原商户订单日期
         'amount'        => 100,         // 付款金额，如果是人民币，则以分为单位
-        'user_ip'       => '127.0.0.1', // 用户IP地址
+        'user_ip'       => '127.0.0.1', // 用户IP地址，这个必须是真实IP，否则会报错“交易存在风险，订单支付失败，错误码xxx”
         'mer_flag'      => 'KMER',
         'app_id'        => 'wx88127142b07ec0e0',
         //'scancode_type' => 'UNION', // 这个在业务中必传
