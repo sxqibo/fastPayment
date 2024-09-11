@@ -138,9 +138,10 @@ final class ScanPayModel extends BaseModel
             return 'orgCode 不能为空';
         }
 
-        if (empty($this->weChatMchId)) {
-            return 'weChatMchId 不能为空';
-        }
+        // 当传值银联支付时，这里可为空，因此注释
+        // if (empty($this->weChatMchId)) {
+        //     return 'weChatMchId 不能为空';
+        // }
 
         if (!empty($this->vasType)) {
             if (empty($this->holderName)) {

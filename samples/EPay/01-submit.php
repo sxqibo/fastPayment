@@ -10,12 +10,12 @@ $param = [
     "pid"          => $config['basic']['pid'],   // 商户ID
 
     // 1.发起支付（页面跳转）-信息
-    "type"         => $config['submit_info']['type'],            // 支付方式
-    "notify_url"   => $config['submit_info']['notify_url'],      // 同步回调
-    "return_url"   => $config['submit_info']['notify_url'],      // 异步回调
-    "out_trade_no" => $config['submit_info']['out_trade_no'],    // 订单号
-    "name"         => $config['submit_info']['name'],            // 商品名称
-    "money"        => $config['submit_info']['money'],           // 金额
+    "type"         => $config['order_info']['type'],            // 支付方式
+    "notify_url"   => $config['order_info']['notify_url'],      // 同步回调
+    "return_url"   => $config['order_info']['notify_url'],      // 异步回调
+    "out_trade_no" => $config['order_info']['out_trade_no'],    // 订单号
+    "name"         => $config['order_info']['name'],            // 商品名称
+    "money"        => $config['order_info']['money'],           // 金额
 ];
 
 $epay      = new EpayServices($config['basic']);
