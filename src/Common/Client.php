@@ -92,12 +92,12 @@ class Client
 
     /**
      * Convert an xml string to an array
-     * @param string $xmlstring
+     * @param string $xmlString
      * @return array
      */
-    protected function xmlToArray($xmlstring)
+    protected function xmlToArray(string $xmlString): array
     {
-        return json_decode(json_encode(simplexml_load_string($xmlstring)), true);
+        return json_decode(json_encode(simplexml_load_string($xmlString)), true);
     }
 
     /**

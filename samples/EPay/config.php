@@ -8,7 +8,7 @@ return [
     ],
 
     // 1 和 2） 发起支付（页面跳转）-信息
-    'submit_info'  => [
+    'order_info'  => [
         'type'         => 'alipay', // 支付方式（可传入 alipay ,wxpay,qqpay,bank,jdpay）
         'notify_url'   => 'http://127.0.0.1/SDK/notify_url.php', // 异步地址， 需http://格式的完整路径，不能加?id=123这类自定义参数
         'return_url'   => 'http://127.0.0.1/SDK/return_url.php', // 同步地址，需http://格式的完整路径，不能加?id=123这类自定义参数
