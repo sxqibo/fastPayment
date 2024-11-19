@@ -165,31 +165,31 @@ class Client
         };
     }
 
-    public function uploadImage(string $fileFullName)
-    {
-        $media = new MediaUtil($fileFullName);
-
-        $client   = $this->getClient();
-        $resp = $client->post('https://api.mch.weixin.qq.com/v3/merchant-service/images/upload', [
-            'body'    => $media->getStream(),
-            'headers' => [
-                'Accept'       => 'application/json',
-                'content-type' => $media->getContentType(),
-            ]
-        ]);
-
-        return $resp->getBody()->getContents();
-    }
-
-    public function requestImage(string $url)
-    {
-        $client   = $this->getClient();
-        $resp = $client->get($url,  [
-            'headers' => [
-                'Accept' => 'application/json',
-            ]
-        ]);
-
-        return $resp->getBody();
-    }
+//    public function uploadImage(string $fileFullName)
+//    {
+//        $media = new MediaUtil($fileFullName);
+//
+//        $client   = $this->getClient();
+//        $resp = $client->post('https://api.mch.weixin.qq.com/v3/merchant-service/images/upload', [
+//            'body'    => $media->getStream(),
+//            'headers' => [
+//                'Accept'       => 'application/json',
+//                'content-type' => $media->getContentType(),
+//            ]
+//        ]);
+//
+//        return $resp->getBody()->getContents();
+//    }
+//
+//    public function requestImage(string $url)
+//    {
+//        $client   = $this->getClient();
+//        $resp = $client->get($url,  [
+//            'headers' => [
+//                'Accept' => 'application/json',
+//            ]
+//        ]);
+//
+//        return $resp->getBody();
+//    }
 }

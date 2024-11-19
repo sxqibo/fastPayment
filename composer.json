@@ -34,7 +34,8 @@
     "ext-curl": "*",
     "ext-json": "*",
     "ext-simplexml": "*",
-    "ext-libxml": "*"
+    "ext-libxml": "*",
+    "wechatpay/wechatpay": "^1.4"
   },
   "require-dev": {
     "monolog/monolog": "^1.0|^2.1"
