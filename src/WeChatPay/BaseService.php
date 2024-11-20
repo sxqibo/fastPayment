@@ -22,12 +22,12 @@ class BaseService
      * @var array
      */
     protected $config = [
-        'appid'                                  => '', // 微信-APPID
-        'mchid'                                  => '', // 微信-商户编号
-        'merchantPrivateKeyContent'              => '', // 商户-私钥内容
-        'merchantCertificateSerial'              => '', // 微信-商户API证书
-        'platformPublicKeyContent'               => '', // 微信-支付平台公钥
-        'platformCertificateSerialOrPublicKeyId' => '', // 微信-平台公钥ID
+        'appid'                       => '', // 微信-APPID
+        'mch_id'                      => '', // 微信-商户编号
+        'cert_private'                => '', // 商户-私钥内容
+        'merchant_certificate_serial' => '', // 微信-商户API证书
+        'platform_public_key'         => '', // 微信-支付平台公钥
+        'public_key_id'               => '', // 微信-平台公钥ID
     ];
 
     /**
@@ -40,12 +40,12 @@ class BaseService
         try {
             $this->validateConfig($options);
 
-            $this->config['appid']                                  = isset($options['appid']) ? $options['appid'] : '';
-            $this->config['mchid']                                  = $options['mchid'];
-            $this->config['merchantPrivateKeyContent']              = $this->loadPrivateKey($options['merchantPrivateKeyContent']);
-            $this->config['merchantCertificateSerial']              = $options['merchantCertificateSerial'];
-            $this->config['platformPublicKeyContent']               = $options['platformPublicKeyContent'];
-            $this->config['platformCertificateSerialOrPublicKeyId'] = $options['platformCertificateSerialOrPublicKeyId'];
+            $this->config['appid']                       = isset($options['appid']) ? $options['appid'] : '';
+            $this->config['mch_id']                      = $options['mch_id'];
+            $this->config['cert_private']                = $this->loadPrivateKey($options['cert_private']);
+            $this->config['merchant_certificate_serial'] = $options['merchant_certificate_serial'];
+            $this->config['platform_public_key']         = $options['platform_public_key'];
+            $this->config['public_key_id']               = $options['public_key_id'];
 
             $this->client = $this->createClient();
 
@@ -63,20 +63,20 @@ class BaseService
      */
     protected function validateConfig(array $options)
     {
-        if (empty($options['mchid'])) {
-            throw new InvalidArgumentException("缺少配置项 -- [mchid]");
+        if (empty($options['mch_id'])) {
+            throw new InvalidArgumentException("缺少配置项 -- [mch_id]");
         }
-        if (empty($options['merchantPrivateKeyContent'])) {
-            throw new InvalidArgumentException("缺少配置项 -- [merchantPrivateKeyContent]");
+        if (empty($options['cert_private'])) {
+            throw new InvalidArgumentException("缺少配置项 -- [cert_private]");
         }
-        if (empty($options['merchantCertificateSerial'])) {
-            throw new InvalidArgumentException("缺少配置项 -- [merchantCertificateSerial]");
+        if (empty($options['merchant_certificate_serial'])) {
+            throw new InvalidArgumentException("缺少配置项 -- [merchant_certificate_serial]");
         }
-        if (empty($options['platformPublicKeyContent'])) {
-            throw new InvalidArgumentException("缺少配置项 -- [platformPublicKeyContent]");
+        if (empty($options['platform_public_key'])) {
+            throw new InvalidArgumentException("缺少配置项 -- [platform_public_key]");
         }
-        if (empty($options['platformCertificateSerialOrPublicKeyId'])) {
-            throw new InvalidArgumentException("缺少配置项 -- [platformCertificateSerialOrPublicKeyId]");
+        if (empty($options['public_key_id'])) {
+            throw new InvalidArgumentException("缺少配置项 -- [public_key_id]");
         }
     }
 
@@ -92,7 +92,7 @@ class BaseService
             if (file_exists($certPrivate)) {
                 return file_get_contents($certPrivate);
             } else {
-                throw new InvalidArgumentException("文件不存在 -- [merchantPrivateKeyContent]");
+                throw new InvalidArgumentException("文件不存在 -- [cert_private]");
             }
         }
         return $certPrivate;
@@ -106,18 +106,18 @@ class BaseService
     protected function createClient()
     {
         // 从本地文件中加载「商户API私钥」，「商户API私钥」会用来生成请求的签名
-        $merchantPrivateKeyInstance = Rsa::from($this->config['merchantPrivateKeyContent'], Rsa::KEY_TYPE_PRIVATE);
+        $merchantPrivateKeyInstance = Rsa::from($this->config['cert_private'], Rsa::KEY_TYPE_PRIVATE);
 
         // 从本地文件中加载「微信支付平台证书」或者「微信支付平台公钥」，用来验证微信支付应答的签名
-        $platformPublicKeyInstance = Rsa::from($this->config['platformPublicKeyContent'], Rsa::KEY_TYPE_PUBLIC);
+        $platformPublicKeyInstance = Rsa::from($this->config['platform_public_key'], Rsa::KEY_TYPE_PUBLIC);
 
         // 构造一个 APIv3 客户端实例
         return Builder::factory([
-            'mchid'      => $this->config['mchid'], // 商户号
-            'serial'     => $this->config['merchantCertificateSerial'], // 「商户API证书」的「证书序列号」
+            'mchid'      => $this->config['mch_id'], // 商户号
+            'serial'     => $this->config['merchant_certificate_serial'], // 「商户API证书」的「证书序列号」
             'privateKey' => $merchantPrivateKeyInstance,
             'certs'      => [
-                $this->config['platformCertificateSerialOrPublicKeyId'] => $platformPublicKeyInstance,
+                $this->config['public_key_id'] => $platformPublicKeyInstance,
             ],
         ]);
     }

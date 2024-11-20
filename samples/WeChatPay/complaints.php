@@ -8,19 +8,19 @@ use Sxqibo\FastPayment\WeChatPay\Complaints;
 
 $options = [
     // 参数一：商户号
-    'mchid'                                  => '',
+    'mch_id' => '',
 
     // 参数二：商户API私钥
-    'merchantPrivateKeyContent'              => '',
+    'cert_private' => '',
 
     // 参数三：「商户API证书」的「证书序列号」
-    'merchantCertificateSerial'              => '',
+    'merchant_certificate_serial' => '',
 
     // 参数四：微信支付平台公钥
-    'platformPublicKeyContent'               => '',
+    'platform_public_key' =>  '',
 
     // 参数五：平台公钥ID
-    'platformCertificateSerialOrPublicKeyId' => '',
+    'public_key_id' => '',
 ];
 
 try {
