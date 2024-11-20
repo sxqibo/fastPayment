@@ -37,8 +37,10 @@ class Complaints extends BaseService
         try {
             if ($query && $method) {
                 $res = $this->client->chain($url)->post($query);
+            } else if ($query) {
+                $res = $this->client->chain($url)->get($query);
             } else {
-                $res = $this->client->chain($url)->get($query ?: null);
+                $res = $this->client->chain($url)->get();
             }
 
             // 获取响应体并解析为数组
