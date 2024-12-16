@@ -83,8 +83,28 @@ class Client
                 }
             }
         } catch (GuzzleException $e) {
-            $paramString = json_encode($options, JSON_UNESCAPED_UNICODE);
-            $errorMsg    = "请求API失败，API:{$endPoint['url']}，参数:{$paramString}，错误信息:[{$e->getMessage()}]";
+            // 检查是否有响应（例如4xx或5xx响应）
+            // 投诉失败时，界面显示可读性的中文失败原因， 投诉本身有一些逻辑，比如频率、客户回复等待等等...
+            if ($e->hasResponse()) {
+                $response = $e->getResponse();
+                $responseBodyAsString = (string)$response->getBody();
+
+                // 如果需要解析JSON格式的数据民
+                try {
+                    $responseData = json_decode($responseBodyAsString, true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $errorMsg = $responseData['message'];
+                    } else {
+                        $errorMsg = 'Failed to decode JSON response.';
+                    }
+                } catch (\Exception $ex) {
+                    $errorMsg = 'Error decoding response body:' . $ex->getMessage();
+                }
+            } else {
+                // $paramString = json_encode($options, JSON_UNESCAPED_UNICODE);
+                // $errorMsg = "请求API失败，API:{$endPoint['url']}，参数:{$paramString}，错误信息:[{$e->getMessage()}]";
+                $errorMsg = $e->getMessage();
+            }
 
             throw new Exception($errorMsg);
         }
