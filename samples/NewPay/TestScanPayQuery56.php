@@ -59,7 +59,7 @@ class TestScanPayQuery56
         $queryOrderScanPayService = new QueryOrderScanPayService();
         $result                    = $queryOrderScanPayService->query($scanPayQueryModel);
         var_dump($result);
-        $this->logger->info("退款查询结果：". json_encode($result, 256));
+        $this->logger->info("扫码支付查询结果：". json_encode($result, 256));
     }
 }
 
