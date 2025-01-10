@@ -9,7 +9,7 @@ return [
      * （一）扫码及查询
      * 5.2 微信&支付宝扫码（C扫B）- 测试OK
      *     【 密钥：1-1 付款私钥 和 1-2 付款公钥 】
-     *     【 示例：TestScanPay52.php 】
+     *     【 示例：02-TestScanPay52.php 】
      * 5.6 查询接口-扫码API - 测试OK
      *     【 密钥：1-1 付款私钥 】
      *     【 示例：TestQueryScanPay56.php 】
@@ -26,7 +26,7 @@ return [
      * （三）代付及查询
      * 5.8 退款接口  - 测试OK
      *     【 密钥：3-1退款私钥 和 3-2退款公钥 】
-     *     【 示例：TestRefund58.php 】
+     *     【 示例：08-TestRefund58.php 】
      * 5.5 查询接口（其实是查询退款接口）- 测试OK
      *     【 密钥：3-1退款私钥 和 3-2退款公钥 】
      *     【 示例：TestQuery55.php 】
